@@ -19,6 +19,21 @@
  */
 package mediathek.controller.starter;
 
+import static mediathek.controller.starter.StarterClass.notifyStartEvent;
+import static mediathek.controller.starter.StarterClass.pruefen;
+import static mediathek.controller.starter.StarterClass.startmeldung;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+
+import javax.swing.SwingUtilities;
+
 import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
 import de.mediathekview.mlib.tool.SysMsg;
@@ -33,18 +48,6 @@ import mediathek.gui.messages.DownloadFinishedEvent;
 import mediathek.gui.messages.DownloadStartEvent;
 import mediathek.tool.MVInfoFile;
 import mediathek.tool.MVSubtitle;
-
-import javax.swing.*;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-
-import static mediathek.controller.starter.StarterClass.*;
 
 public class DirectHttpDownload extends Thread {
 
