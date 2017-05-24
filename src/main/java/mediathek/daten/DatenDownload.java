@@ -19,8 +19,24 @@
  */
 package mediathek.daten;
 
+import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+
+import org.apache.commons.lang3.time.FastDateFormat;
+
 import de.mediathekview.mlib.daten.DatenFilm;
-import de.mediathekview.mlib.tool.*;
+import de.mediathekview.mlib.daten.Film;
+import de.mediathekview.mlib.tool.Datum;
+import de.mediathekview.mlib.tool.FilenameUtils;
+import de.mediathekview.mlib.tool.GermanStringSorter;
+import de.mediathekview.mlib.tool.Listener;
+import de.mediathekview.mlib.tool.Log;
 import mediathek.config.Daten;
 import mediathek.config.Konstanten;
 import mediathek.config.MVConfig;
@@ -29,14 +45,10 @@ import mediathek.controller.starter.Start;
 import mediathek.tool.FormatterUtil;
 import mediathek.tool.GuiFunktionen;
 import mediathek.tool.MVFilmSize;
-import org.apache.commons.lang3.time.FastDateFormat;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
 
 public final class DatenDownload extends MVData<DatenDownload> {
+	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
+	private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
 
     // Quelle - start über einen Button - Download - Abo
     public static final byte QUELLE_ALLE = -1;
@@ -116,10 +128,9 @@ public final class DatenDownload extends MVData<DatenDownload> {
         "Dateiname", "Pfad", "Pfad-Dateiname", "Art", "Quelle",
         "Zurueckgestellt", "Infodatei", "Spotlight", "Untertitel", "Remote-Download", "Ref"};
     public static boolean[] spaltenAnzeigen = new boolean[MAX_ELEM];
-    public String[] arr;
 
     public Datum datumFilm = new Datum(0);
-    public DatenFilm film = null;
+    public Film film = null;
     public MVFilmSize mVFilmSize = new MVFilmSize();
     public Start start = null;
     public DatenPset pSet = null;
@@ -132,63 +143,15 @@ public final class DatenDownload extends MVData<DatenDownload> {
         makeArr();
     }
 
-    public DatenDownload(DatenPset pSet, DatenFilm film, byte quelle, DatenAbo abo, String name, String pfad, String aufloesung) {
+    public DatenDownload(DatenPset pSet, Film film, byte quelle, DatenAbo abo, String name, String pfad, String aufloesung) {
         makeArr();
         this.film = film;
         this.pSet = pSet;
         this.abo = abo;
-        arr[DOWNLOAD_FILM_NR] = film.arr[DatenFilm.FILM_NR];
-        arr[DOWNLOAD_SENDER] = film.arr[DatenFilm.FILM_SENDER];
-        arr[DOWNLOAD_THEMA] = film.arr[DatenFilm.FILM_THEMA];
-        arr[DOWNLOAD_TITEL] = film.arr[DatenFilm.FILM_TITEL];
-        arr[DOWNLOAD_FILM_URL] = film.arr[DatenFilm.FILM_URL];
-        arr[DOWNLOAD_URL_SUBTITLE] = film.getUrlSubtitle();
-        arr[DOWNLOAD_DATUM] = film.arr[DatenFilm.FILM_DATUM];
-        arr[DOWNLOAD_ZEIT] = film.arr[DatenFilm.FILM_ZEIT];
-        arr[DOWNLOAD_URL_RTMP] = film.arr[DatenFilm.FILM_URL_RTMP];
-        arr[DOWNLOAD_DAUER] = film.arr[DatenFilm.FILM_DAUER];
-        arr[DOWNLOAD_HD] = film.isHD() ? "1" : "0";
-        arr[DOWNLOAD_UT] = film.hasUT() ? "1" : "0";
-        arr[DOWNLOAD_QUELLE] = String.valueOf(quelle);
-        arr[DOWNLOAD_HISTORY_URL] = film.getUrlHistory();
-        if (aufloesung.isEmpty()) {
-            arr[DOWNLOAD_URL] = film.getUrlFuerAufloesung(pSet.arr[DatenPset.PROGRAMMSET_AUFLOESUNG]);
-            arr[DOWNLOAD_URL_RTMP] = film.getUrlRtmpFuerAufloesung(pSet.arr[DatenPset.PROGRAMMSET_AUFLOESUNG]);
-        } else {
-            arr[DOWNLOAD_URL] = film.getUrlFuerAufloesung(aufloesung);
-            arr[DOWNLOAD_URL_RTMP] = film.getUrlRtmpFuerAufloesung(aufloesung);
-        }
-        arr[DatenDownload.DOWNLOAD_INFODATEI] = pSet.arr[DatenPset.PROGRAMMSET_INFODATEI];
-        arr[DatenDownload.DOWNLOAD_SUBTITLE] = pSet.arr[DatenPset.PROGRAMMSET_SUBTITLE];
-        arr[DatenDownload.DOWNLOAD_SPOTLIGHT] = pSet.arr[DatenPset.PROGRAMMSET_SPOTLIGHT];
-        arr[DatenDownload.DOWNLOAD_GEO] = film.arr[DatenFilm.FILM_GEO];
-        // und jetzt noch die Dateigröße für die entsp. URL
-        setGroesseFromFilm();
-        //setGroesse(""); //dann dauert das Starten uu sehr lange
-
         aufrufBauen(pSet, film, abo, name, pfad);
         init();
     }
 
-    public void setGroesseFromFilm() {
-        if (film != null) {
-            if (film.arr[DatenFilm.FILM_URL].equals(arr[DOWNLOAD_URL])) {
-                mVFilmSize.setSize(film.arr[DatenFilm.FILM_GROESSE]);
-            } else {
-                mVFilmSize.setSize("");
-            }
-        }
-    }
-
-    public void setGroesse(String groesse) {
-        if (film != null) {
-            if (!groesse.isEmpty()) {
-                mVFilmSize.setSize(groesse);
-            } else {
-                mVFilmSize.setSize(film.getDateigroesse(arr[DOWNLOAD_URL]));
-            }
-        }
-    }
 
     public static boolean anzeigen(int i) {
         if (spaltenAnzeigen == null) {
@@ -432,7 +395,7 @@ public final class DatenDownload extends MVData<DatenDownload> {
         aufrufBauen(pSet, film, abo, arr[DOWNLOAD_ZIEL_DATEINAME], arr[DOWNLOAD_ZIEL_PFAD]);
     }
 
-    private void aufrufBauen(DatenPset pSet, DatenFilm film, DatenAbo abo, String nname, String ppfad) {
+    private void aufrufBauen(DatenPset pSet, Film film, DatenAbo abo, String nname, String ppfad) {
         //zieldatei und pfad bauen und eintragen
         try {
             DatenProg programm = pSet.getProgUrl(arr[DOWNLOAD_URL]);
@@ -495,7 +458,7 @@ public final class DatenDownload extends MVData<DatenDownload> {
         return befehlsString;
     }
 
-    private void dateinamePfadBauen(DatenPset pSet, DatenFilm film, DatenAbo abo, String nname, String ppfad) {
+    private void dateinamePfadBauen(DatenPset pSet, Film film, DatenAbo abo, String nname, String ppfad) {
         // nname und ppfad sind nur belegt, wenn der Download über den DialogAddDownload gestartet wurde (aus TabFilme)
         String name;
         String path;
@@ -616,7 +579,7 @@ public final class DatenDownload extends MVData<DatenDownload> {
         arr[DOWNLOAD_ZIEL_PFAD_DATEINAME] = GuiFunktionen.addsPfad(pathName[0], pathName[1]);
     }
 
-    private String replaceString(String replStr, DatenFilm film) {
+    private String replaceString(String replStr, Film film) {
         //hier wird nur ersetzt! 
         //Felder mit variabler Länge, evtl. vorher kürzen
 
@@ -630,14 +593,14 @@ public final class DatenDownload extends MVData<DatenDownload> {
             }
         }
 
-        replStr = replStr.replace("%t", getField(film.arr[DatenFilm.FILM_THEMA], laenge));
-        replStr = replStr.replace("%T", getField(film.arr[DatenFilm.FILM_TITEL], laenge));
-        replStr = replStr.replace("%s", getField(film.arr[DatenFilm.FILM_SENDER], laenge));
+        replStr = replStr.replace("%t", getField(film.getThema(), laenge));
+        replStr = replStr.replace("%T", getField(film.getTitel(), laenge));
+        replStr = replStr.replace("%s", getField(film.getSender().getName(), laenge));
         replStr = replStr.replace("%N", getField(GuiFunktionen.getDateiName(this.arr[DatenDownload.DOWNLOAD_URL]), laenge));
 
         //Felder mit fester Länge werden immer ganz geschrieben
-        replStr = replStr.replace("%D", film.arr[DatenFilm.FILM_DATUM].equals("") ? getHeute_yyyyMMdd() : datumDatumZeitReinigen(datumDrehen(film.arr[DatenFilm.FILM_DATUM])));
-        replStr = replStr.replace("%d", film.arr[DatenFilm.FILM_ZEIT].equals("") ? getJetzt_HHMMSS() : datumDatumZeitReinigen(film.arr[DatenFilm.FILM_ZEIT]));
+        replStr = replStr.replace("%D", toDateAsText(film.getTime()));
+        replStr = replStr.replace("%d", toTimeAsText(film.getTime()));
         replStr = replStr.replace("%H", getHeute_yyyyMMdd());
         replStr = replStr.replace("%h", getJetzt_HHMMSS());
 
@@ -675,7 +638,15 @@ public final class DatenDownload extends MVData<DatenDownload> {
         return replStr;
     }
 
-    private String getField(String name, int length) {
+    private String toDateAsText(LocalDateTime aLocalDateTime) {
+		return aLocalDateTime.format(DATE_FORMATTER);
+	}
+    
+    private String toTimeAsText(LocalDateTime aLocalDateTime) {
+		return aLocalDateTime.format(TIME_FORMATTER);
+	}
+
+	private String getField(String name, int length) {
         name = FilenameUtils.replaceLeerDateiname(name, false /*pfad*/,
                 Boolean.parseBoolean(MVConfig.get(MVConfig.Configs.SYSTEM_USE_REPLACETABLE)),
                 Boolean.parseBoolean(MVConfig.get(MVConfig.Configs.SYSTEM_ONLY_ASCII)));

@@ -14,7 +14,7 @@ apply from: "${project.rootDir}/gradle/eclipse.gradle"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 group = 'de.mediathekview'
-version = '13.1.0'
+version = '13.1.1'
 
 def jarName = 'MediathekView.jar'
 def mainClass = 'mediathek.Main'
@@ -61,7 +61,7 @@ repositories {
 }
 
 dependencies {
-    compile 'de.mediathekview:MLib:3.0.1'
+    compile 'de.mediathekview:MLib:3.0.2-SNAPSHOT'
 
     compile "$swingxGroup:swingx-action:$swingxVersion"
     compile "$swingxGroup:swingx-autocomplete:$swingxVersion"

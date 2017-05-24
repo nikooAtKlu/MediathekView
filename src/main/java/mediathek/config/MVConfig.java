@@ -26,7 +26,8 @@ import java.util.Set;
 
 import com.jidesoft.utils.SystemInfo;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import de.mediathekview.mlib.daten.Film;
+import de.mediathekview.mlib.daten.GeoLocations;
 import de.mediathekview.mlib.tool.Functions;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.controller.MVBandwidthTokenBucket;
@@ -93,7 +94,7 @@ public class MVConfig {
         SYSTEM_NOTIFICATION("Notification-anzeigen", Boolean.TRUE.toString()),
         SYSTEM_PLAYER_ABSPIELEN("Player-zum-Abspielen"),
         SYSTEM_GEO_MELDEN("Geo-melden", Boolean.TRUE.toString()),
-        SYSTEM_GEO_STANDORT("Geo-Standort", DatenFilm.GEO_DE),
+        SYSTEM_GEO_STANDORT("Geo-Standort", GeoLocations.GEO_DE.getDescription()),
         // Fenstereinstellungen
         SYSTEM_GROESSE_GUI("Groesse"),
         SYSTEM_GROESSE_EINSTELLUNGEN("Groesse-Einstellungen"),
