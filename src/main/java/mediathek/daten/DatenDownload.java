@@ -22,16 +22,15 @@ package mediathek.daten;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 
-import org.apache.commons.lang3.time.FastDateFormat;
-
-import de.mediathekview.mlib.daten.DatenFilm;
 import de.mediathekview.mlib.daten.Film;
+import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.Datum;
 import de.mediathekview.mlib.tool.FilenameUtils;
 import de.mediathekview.mlib.tool.GermanStringSorter;
@@ -251,7 +250,7 @@ public final class DatenDownload extends MVData<DatenDownload> {
 
     public static void startenDownloads(Daten ddaten, ArrayList<DatenDownload> downloads) {
         // Start erstellen und zur Liste hinzufügen
-        String zeit = FormatterUtil.FORMATTER_ddMMyyyy.format(new Date());
+        String zeit = FormatterUtil.FORMATTER_ddMMyyyy.format(LocalDate.now());
         LinkedList<MVUsedUrl> urlList = new LinkedList<>();
         for (DatenDownload d : downloads) {
             d.start = new Start();
@@ -481,7 +480,7 @@ public final class DatenDownload extends MVData<DatenDownload> {
             // ##############################
             // Name sinnvoll belegen
             if (name.equals("")) {
-                name = getHeute_yyyyMMdd() + "_" + arr[DatenDownload.DOWNLOAD_THEMA] + "-" + arr[DatenDownload.DOWNLOAD_TITEL] + ".mp4";
+                name = formatDate_yyyyMMdd(LocalDate.now()) + "_" + arr[DatenDownload.DOWNLOAD_THEMA] + "-" + arr[DatenDownload.DOWNLOAD_TITEL] + ".mp4";
             }
 
             //Tags ersetzen
@@ -567,7 +566,7 @@ public final class DatenDownload extends MVData<DatenDownload> {
             path = GuiFunktionen.getStandardDownloadPath();
         }
         if (name.isEmpty()) {
-            name = getHeute_yyyyMMdd() + "_" + arr[DatenDownload.DOWNLOAD_THEMA] + "-" + arr[DatenDownload.DOWNLOAD_TITEL] + ".mp4";
+            name = formatDate_yyyyMMdd(LocalDate.now()) + "_" + arr[DatenDownload.DOWNLOAD_THEMA] + "-" + arr[DatenDownload.DOWNLOAD_TITEL] + ".mp4";
         }
 
         // in Win dürfen die Pfade nicht länger als 255 Zeichen haben (für die Infodatei kommen noch ".txt" dazu)
@@ -601,33 +600,27 @@ public final class DatenDownload extends MVData<DatenDownload> {
         //Felder mit fester Länge werden immer ganz geschrieben
         replStr = replStr.replace("%D", toDateAsText(film.getTime()));
         replStr = replStr.replace("%d", toTimeAsText(film.getTime()));
-        replStr = replStr.replace("%H", getHeute_yyyyMMdd());
-        replStr = replStr.replace("%h", getJetzt_HHMMSS());
+        replStr = replStr.replace("%H", formatDate_yyyyMMdd(LocalDate.now()));
+        replStr = replStr.replace("%h", formatTime_HHMMSS(LocalTime.now()));
 
-        replStr = replStr.replace("%1", getDMY("%1", film.arr[DatenFilm.FILM_DATUM].equals("") ? getHeute_yyyy_MM_dd() : film.arr[DatenFilm.FILM_DATUM]));
-        replStr = replStr.replace("%2", getDMY("%2", film.arr[DatenFilm.FILM_DATUM].equals("") ? getHeute_yyyy_MM_dd() : film.arr[DatenFilm.FILM_DATUM]));
-        replStr = replStr.replace("%3", getDMY("%3", film.arr[DatenFilm.FILM_DATUM].equals("") ? getHeute_yyyy_MM_dd() : film.arr[DatenFilm.FILM_DATUM]));
+        replStr = replStr.replace("%1", getDMY("%1", film.getTime() == null ? formatDate_yyyy_MM_dd(LocalDate.now()) : formatDate_yyyy_MM_dd(film.getTime().toLocalDate())));
+        replStr = replStr.replace("%2", getDMY("%2", film.getTime() == null ? formatDate_yyyy_MM_dd(LocalDate.now()) : formatDate_yyyy_MM_dd(film.getTime().toLocalDate())));
+        replStr = replStr.replace("%3", getDMY("%3", film.getTime() == null ? formatDate_yyyy_MM_dd(LocalDate.now()) : formatDate_yyyy_MM_dd(film.getTime().toLocalDate())));
 
-        replStr = replStr.replace("%4", getHMS("%4", film.arr[DatenFilm.FILM_ZEIT].equals("") ? getJetzt_HH_MM_SS() : film.arr[DatenFilm.FILM_ZEIT]));
-        replStr = replStr.replace("%5", getHMS("%5", film.arr[DatenFilm.FILM_ZEIT].equals("") ? getJetzt_HH_MM_SS() : film.arr[DatenFilm.FILM_ZEIT]));
-        replStr = replStr.replace("%6", getHMS("%6", film.arr[DatenFilm.FILM_ZEIT].equals("") ? getJetzt_HH_MM_SS() : film.arr[DatenFilm.FILM_ZEIT]));
+        replStr = replStr.replace("%4", getHMS("%4", film.getTime() == null ? formatTime_HH_MM_SS(LocalTime.now()) : formatTime_HH_MM_SS(film.getTime().toLocalTime())));
+        replStr = replStr.replace("%5", getHMS("%5", film.getTime() == null ? formatTime_HH_MM_SS(LocalTime.now()) : formatTime_HH_MM_SS(film.getTime().toLocalTime())));
+        replStr = replStr.replace("%6", getHMS("%6", film.getTime() == null ? formatTime_HH_MM_SS(LocalTime.now()) : formatTime_HH_MM_SS(film.getTime().toLocalTime())));
 
-        replStr = replStr.replace("%i", String.valueOf(film.nr));
+        replStr = replStr.replace("%i", String.valueOf(film.getUuid()));
 
         String res = "";
-        if (arr[DOWNLOAD_URL].equals(film.getUrlFuerAufloesung(DatenFilm.AUFLOESUNG_NORMAL))) {
+        if (arr[DOWNLOAD_URL].equals(film.getUrl(Qualities.NORMAL).toString())) {
             res = "H";
-        } else if (arr[DOWNLOAD_URL].equals(film.getUrlFuerAufloesung(DatenFilm.AUFLOESUNG_HD))) {
+        } else if (arr[DOWNLOAD_URL].equals(film.getUrl(Qualities.HD).toString())) {
             res = "HD";
-        } else if (arr[DOWNLOAD_URL].equals(film.getUrlFuerAufloesung(DatenFilm.AUFLOESUNG_KLEIN))) {
+        } else if (arr[DOWNLOAD_URL].equals(film.getUrl(Qualities.SMALL).toString())) {
             res = "L";
-        } else if (arr[DOWNLOAD_URL].equals(film.getUrlRtmpFuerAufloesung(DatenFilm.AUFLOESUNG_NORMAL))) {
-            res = "H";
-        } else if (arr[DOWNLOAD_URL].equals(film.getUrlRtmpFuerAufloesung(DatenFilm.AUFLOESUNG_HD))) {
-            res = "HD";
-        } else if (arr[DOWNLOAD_URL].equals(film.getUrlRtmpFuerAufloesung(DatenFilm.AUFLOESUNG_KLEIN))) {
-            res = "L";
-        }
+        } 
         replStr = replStr.replace("%q", res); //%q Qualität des Films ("HD", "H", "L")
 
         replStr = replStr.replace("%S", GuiFunktionen.getSuffixFromUrl(this.arr[DatenDownload.DOWNLOAD_URL]));
@@ -661,20 +654,20 @@ public final class DatenDownload extends MVData<DatenDownload> {
         return name;
     }
 
-    private String getJetzt_HHMMSS() {
-        return FastDateFormat.getInstance("HHmmss").format(new Date());
+    private String formatTime_HHMMSS(LocalTime aTime) {
+        return DateTimeFormatter.ofPattern("HHmmss").format(aTime);
     }
 
-    private String getJetzt_HH_MM_SS() {
-        return FormatterUtil.FORMATTER_HHmmss.format(new Date());
+    private String formatTime_HH_MM_SS(LocalTime aTime) {
+        return FormatterUtil.FORMATTER_HHmmss.format(aTime);
     }
 
-    private String getHeute_yyyyMMdd() {
-        return FormatterUtil.FORMATTER_yyyyMMdd.format(new Date());
+    private String formatDate_yyyyMMdd(LocalDate aDate) {
+        return FormatterUtil.FORMATTER_yyyyMMdd.format(aDate);
     }
 
-    private String getHeute_yyyy_MM_dd() {
-        return FormatterUtil.FORMATTER_ddMMyyyy.format(new Date());
+    private String formatDate_yyyy_MM_dd(LocalDate aDate) {
+        return FormatterUtil.FORMATTER_ddMMyyyy.format(aDate);
     }
 
     private static String getDMY(String s, String datum) {
@@ -774,9 +767,9 @@ public final class DatenDownload extends MVData<DatenDownload> {
         if (!arr[DatenDownload.DOWNLOAD_DATUM].equals("")) {
             try {
                 if (!arr[DatenDownload.DOWNLOAD_ZEIT].equals("")) {
-                    tmp.setTime(FormatterUtil.FORMATTER_ddMMyyyyHHmmss.parse(arr[DatenDownload.DOWNLOAD_DATUM] + arr[DatenDownload.DOWNLOAD_ZEIT]).getTime());
+                    tmp.setTime(LocalDateTime.parse(arr[DatenDownload.DOWNLOAD_DATUM] + arr[DatenDownload.DOWNLOAD_ZEIT],FormatterUtil.FORMATTER_ddMMyyyyHHmmss).atZone(ZoneOffset.systemDefault()).toEpochSecond());
                 } else {
-                    tmp.setTime(FormatterUtil.FORMATTER_ddMMyyyy.parse(arr[DatenDownload.DOWNLOAD_DATUM]).getTime());
+                    tmp.setTime(LocalDateTime.parse(arr[DatenDownload.DOWNLOAD_DATUM], FormatterUtil.FORMATTER_ddMMyyyy).atZone(ZoneOffset.systemDefault()).toEpochSecond());
                 }
             } catch (Exception ex) {
                 Log.errorLog(649897321, ex,

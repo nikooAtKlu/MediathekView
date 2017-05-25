@@ -30,6 +30,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.ArrayList;
 
 import javax.swing.SwingUtilities;
@@ -390,12 +391,13 @@ public class DirectHttpDownload extends Thread {
 
     private void bereitsAnschauen(DatenDownload datenDownload) {
         if (datenDownload.film != null && datenDownload.start != null) {
-            if (datenDownload.film.dauerL > 0
+        	Duration dauer = datenDownload.film.getDuration();
+            if (dauer.compareTo(Duration.ZERO) > 0
                     && datenDownload.start.restSekunden > 0
                     && datenDownload.mVFilmSize.getAktSize() > 0
                     && datenDownload.mVFilmSize.getSize() > 0) {
                 // macht nur dann Sinn
-                final long zeitGeladen = datenDownload.film.dauerL * datenDownload.mVFilmSize.getAktSize() / datenDownload.mVFilmSize.getSize();
+                final long zeitGeladen = dauer.getSeconds() * datenDownload.mVFilmSize.getAktSize() / datenDownload.mVFilmSize.getSize();
                 if (zeitGeladen > (datenDownload.start.restSekunden * 1.1 /* plus 10% zur Sicherheit*/)) {
                     datenDownload.start.beginnAnschauen = true;
                 }
