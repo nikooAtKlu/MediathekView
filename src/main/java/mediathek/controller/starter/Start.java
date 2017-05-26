@@ -22,6 +22,8 @@ package mediathek.controller.starter;
 import de.mediathekview.mlib.tool.Datum;
 import mediathek.controller.MVInputStream;
 
+import java.time.LocalDateTime;
+
 public class Start {
 
     public static final int PROGRESS_NICHT_GESTARTET = -1;
@@ -37,7 +39,7 @@ public class Start {
     public boolean beginnAnschauen = false;
     public int countRestarted = 0;
 
-    public Datum startZeit = null;
+    public LocalDateTime startZeit = null;
     public long restSekunden = -1;
     public MVInputStream mVInputStream = null;
     // Stati

@@ -19,23 +19,26 @@
  */
 package mediathek.controller;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.daten.ListeFilme;
+import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.tool.FormatterUtil;
 
 import java.io.*;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @SuppressWarnings("serial")
 public class MVUsedUrls {
 
-    private final HashSet<String> listeUrls;
+    private final HashSet<URI> listeUrls;
     private final LinkedList<MVUsedUrl> listeUrlsSortDate;
     private final String fileName;
     private final String settingsDir;
@@ -56,7 +59,7 @@ public class MVUsedUrls {
         listeBauen();
     }
 
-    public synchronized void setGesehen(boolean gesehen, ArrayList<DatenFilm> arrayFilms, ListeFilme listeFilmeHistory) {
+    public synchronized void setGesehen(boolean gesehen, ArrayList<Film> arrayFilms, ListeFilme listeFilmeHistory) {
         if (arrayFilms.isEmpty()) {
             return;
         }
@@ -64,8 +67,8 @@ public class MVUsedUrls {
             urlAusLogfileLoeschen(arrayFilms);
             arrayFilms.forEach(listeFilmeHistory::remove);
         } else {
-            ArrayList<DatenFilm> neueFilme = new ArrayList<>();
-            arrayFilms.stream().filter(film -> !urlPruefen(film.getUrlHistory()))
+            ArrayList<Film> neueFilme = new ArrayList<>();
+            arrayFilms.stream().filter(film -> !urlPruefen(film.getUrl(Qualities.NORMAL)))
                     .forEach(film -> {
                         neueFilme.add(film);
                         listeFilmeHistory.add(film);
@@ -85,7 +88,7 @@ public class MVUsedUrls {
         Listener.notify(notifyEvent, MVUsedUrls.class.getSimpleName());
     }
 
-    public synchronized boolean urlPruefen(String urlFilm) {
+    public synchronized boolean urlPruefen(URI urlFilm) {
         //wenn url gefunden, dann true zurück
         return listeUrls.contains(urlFilm);
     }
@@ -95,7 +98,7 @@ public class MVUsedUrls {
         Iterator<MVUsedUrl> iterator = listeUrlsSortDate.iterator();
         final Object[][] object = new Object[listeUrlsSortDate.size()][];
         while (iterator.hasNext()) {
-            object[i] = iterator.next().uUrl;
+            object[i] = iterator.next().;
             ++i;
         }
         return object;
@@ -151,7 +154,7 @@ public class MVUsedUrls {
         return gefunden;
     }
 
-    public synchronized boolean urlAusLogfileLoeschen(ArrayList<DatenFilm> filme) {
+    public synchronized boolean urlAusLogfileLoeschen(ArrayList<Film> filme) {
         //Logfile einlesen, entsprechende Zeile Filtern und dann Logfile überschreiben
         //wenn die URL im Logfiel ist, dann true zurück
         String zeile;
@@ -167,10 +170,10 @@ public class MVUsedUrls {
         try (LineNumberReader in = new LineNumberReader(new InputStreamReader(Files.newInputStream(urlPath)))) {
             while ((zeile = in.readLine()) != null) {
                 gef = false;
-                String url = MVUsedUrl.getUrlAusZeile(zeile).getUrl();
+                URI url = MVUsedUrl.getUrlAusZeile(zeile).getUrl();
 
-                for (DatenFilm film : filme) {
-                    if (url.equals(film.getUrlHistory())) {
+                for (Film film : filme) {
+                    if (url.equals(film.getUrl(Qualities.NORMAL))) {
                         gefunden = true; //nur dann muss das Logfile auch geschrieben werden
                         gef = true; // und die Zeile wird verworfen
                         break;
@@ -202,10 +205,10 @@ public class MVUsedUrls {
         return gefunden;
     }
 
-    public synchronized boolean zeileSchreiben(String thema, String titel, String url) {
+    public synchronized boolean zeileSchreiben(String thema, String titel, URI url) {
         boolean ret = false;
         String text;
-        String datum = FormatterUtil.FORMATTER_ddMMyyyy.format(new Date());
+        String datum = FormatterUtil.FORMATTER_ddMMyyyy.format(LocalDateTime.now());
         listeUrls.add(url);
         listeUrlsSortDate.add(new MVUsedUrl(datum, thema, titel, url));
 
@@ -222,18 +225,17 @@ public class MVUsedUrls {
         return ret;
     }
 
-    public synchronized boolean zeileSchreiben(ArrayList<DatenFilm> arrayFilms) {
+    public synchronized boolean zeileSchreiben(ArrayList<Film> arrayFilms) {
         boolean ret = false;
         String text;
-        String datum = FormatterUtil.FORMATTER_ddMMyyyy.format(new Date());
+        String datum = FormatterUtil.FORMATTER_ddMMyyyy.format(LocalDateTime.now());
 
         try (BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(getUrlFilePath(), StandardOpenOption.APPEND)))) {
 
-            for (DatenFilm film : arrayFilms) {
-                // film.arr[DatenFilm.FILM_THEMA_NR], film.arr[DatenFilm.FILM_TITEL_NR], film.getUrlHistory()
-                listeUrls.add(film.getUrlHistory());
-                listeUrlsSortDate.add(new MVUsedUrl(datum, film.arr[DatenFilm.FILM_THEMA], film.arr[DatenFilm.FILM_TITEL], film.getUrlHistory()));
-                text = MVUsedUrl.getUsedUrl(datum, film.arr[DatenFilm.FILM_THEMA], film.arr[DatenFilm.FILM_TITEL], film.getUrlHistory());
+            for (Film film : arrayFilms) {
+                listeUrls.add(film.getUrl(Qualities.NORMAL));
+                listeUrlsSortDate.add(new MVUsedUrl(datum, film.getThema(), film.getTitel(), film.getUrl(Qualities.NORMAL)));
+                text = MVUsedUrl.getUsedUrl(datum, film.getThema(), film.getTitel(), film.getUrl(Qualities.NORMAL));
                 bufferedWriter.write(text);
             }
 

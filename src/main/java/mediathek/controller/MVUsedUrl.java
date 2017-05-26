@@ -23,25 +23,28 @@ import de.mediathekview.mlib.tool.Functions;
 import de.mediathekview.mlib.tool.GermanStringSorter;
 import de.mediathekview.mlib.tool.Log;
 
+import java.net.URI;
+
 public class MVUsedUrl implements Comparable<MVUsedUrl> {
 
-    public static final String[] title = {"Datum", "Thema", "Titel", "Url"};
-    public static final int USED_URL_DATUM = 0;
-    public static final int USED_URL_THEMA = 1;
-    public static final int USED_URL_TITEL = 2;
-    public static final int USED_URL_URL = 3;
-    
     private static final GermanStringSorter sorter = GermanStringSorter.getInstance();
     private final static String TRENNER = "  |###|  ";
     private final static String PAUSE = " |#| ";
 
-    String[] uUrl;
 
-    public MVUsedUrl(String date, String thema, String title, String url) {
-        this.uUrl = new String[]{date, thema, title, url};
+    private String dateAsText;
+    private String thema;
+    private String title;
+    private URI url;
+
+    public MVUsedUrl(String aDate, String aThema, String aTitle, URI aUrl) {
+        dateAsText = aDate;
+        thema= aThema;
+        title = aTitle;
+        url = aUrl;
     }
 
-    public static String getUsedUrl(String date, String thema, String title, String url) {
+    public static String getUsedUrl(String date, String thema, String title, URI url) {
         return date + PAUSE
                 + Functions.textLaenge(25, putzen(thema), false /* mitte */, false /*addVorne*/) + PAUSE
                 + Functions.textLaenge(40, putzen(title), false /* mitte */, false /*addVorne*/) + TRENNER
@@ -49,28 +52,29 @@ public class MVUsedUrl implements Comparable<MVUsedUrl> {
     }
 
     public String getUsedUrl() {
-        return uUrl[USED_URL_DATUM] + PAUSE
-                + Functions.textLaenge(25, putzen(uUrl[USED_URL_THEMA]), false /* mitte */, false /*addVorne*/) + PAUSE
-                + Functions.textLaenge(40, putzen(uUrl[USED_URL_TITEL]), false /* mitte */, false /*addVorne*/) + TRENNER
-                + uUrl[USED_URL_URL] + '\n';
+        return dateAsText + PAUSE
+                + Functions.textLaenge(25, putzen(thema), false /* mitte */, false /*addVorne*/) + PAUSE
+                + Functions.textLaenge(40, putzen(title), false /* mitte */, false /*addVorne*/) + TRENNER
+                + url + '\n';
     }
 
     public static MVUsedUrl getUrlAusZeile(String zeile) {
         // 29.05.2014 |#| Abendschau                |#| Patenkind trifft Groß                     |###|  http://cdn-storage.br.de/iLCpbHJGNLT6NK9HsLo6s61luK4C_2rc5U1S/_-OS/5-8y9-NP/5bb33365-038d-46f7-914b-eb83fab91448_E.mp4
-        String url = "", thema = "", titel = "", datum = "";
+        URI url = null;
+        String thema = "", titel = "", datum = "";
         int a1;
         try {
             if (zeile.contains(TRENNER)) {
                 //neues Logfile-Format
                 a1 = zeile.lastIndexOf(TRENNER);
                 a1 += TRENNER.length();
-                url = zeile.substring(a1).trim();
+                url = new URI(zeile.substring(a1).trim());
                 // titel
                 titel = zeile.substring(zeile.lastIndexOf(PAUSE) + PAUSE.length(), zeile.lastIndexOf(TRENNER)).trim();
                 datum = zeile.substring(0, zeile.indexOf(PAUSE)).trim();
                 thema = zeile.substring(zeile.indexOf(PAUSE) + PAUSE.length(), zeile.lastIndexOf(PAUSE)).trim();
             } else {
-                url = zeile;
+                url = new URI(zeile);
             }
         } catch (Exception ex) {
             Log.errorLog(398853224, ex);
@@ -79,26 +83,26 @@ public class MVUsedUrl implements Comparable<MVUsedUrl> {
     }
 
     public static String getHeaderString() {
-        return Functions.textLaenge(40, title[USED_URL_TITEL], false /* mitte */, false /*addVorne*/)
-                + "    " + Functions.textLaenge(25, title[USED_URL_THEMA], false /* mitte */, false /*addVorne*/)
-                + "    " + Functions.textLaenge(10, title[USED_URL_DATUM], false /* mitte */, false /*addVorne*/)
-                + "    " + title[USED_URL_URL];
+        return Functions.textLaenge(40, "Titel", false /* mitte */, false /*addVorne*/)
+                + "    " + Functions.textLaenge(25, "Thema", false /* mitte */, false /*addVorne*/)
+                + "    " + Functions.textLaenge(10, "Datum", false /* mitte */, false /*addVorne*/)
+                + "    " + "Url";
     }
 
     public String getString() {
-        return Functions.textLaenge(40, uUrl[USED_URL_TITEL], false /* mitte */, false /*addVorne*/)
-                + "    " + Functions.textLaenge(25, uUrl[USED_URL_THEMA], false /* mitte */, false /*addVorne*/)
-                + "    " + (uUrl[USED_URL_DATUM].isEmpty() ? "          " : uUrl[USED_URL_DATUM])
-                + "    " + uUrl[USED_URL_URL];
+        return Functions.textLaenge(40, title, false /* mitte */, false /*addVorne*/)
+                + "    " + Functions.textLaenge(25, thema, false /* mitte */, false /*addVorne*/)
+                + "    " + (dateAsText.isEmpty() ? "          " : dateAsText)
+                + "    " + url;
     }
 
-    public String getUrl() {
-        return uUrl[USED_URL_URL];
+    public URI getUrl() {
+        return url;
     }
 
     @Override
     public int compareTo(MVUsedUrl arg0) {
-        return sorter.compare(uUrl[USED_URL_TITEL], arg0.uUrl[USED_URL_TITEL]);
+        return sorter.compare(title, arg0.title);
     }
 
     private static String putzen(String s) {

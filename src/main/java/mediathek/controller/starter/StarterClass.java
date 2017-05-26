@@ -21,7 +21,8 @@ package mediathek.controller.starter;
 
 import com.apple.eawt.Application;
 import com.jidesoft.utils.SystemInfo;
-import de.mediathekview.mlib.daten.DatenFilm;
+import de.mediathekview.mlib.daten.Film;
+import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.Datum;
 import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
@@ -39,7 +40,12 @@ import mediathek.tool.MVNotification;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class StarterClass {
     //Tags Filme
@@ -57,16 +63,15 @@ public class StarterClass {
         starten.start();
     }
 
-    public synchronized void urlMitProgrammStarten(DatenPset pSet, DatenFilm ersterFilm, String aufloesung) {
+    public synchronized void urlMitProgrammStarten(DatenPset pSet, Film ersterFilm, String aufloesung) {
         // url mit dem Programm mit der Nr. starten (Button oder TabDownload "rechte Maustaste")
         // Quelle "Button" ist immer ein vom User gestarteter Film, also Quelle_Button!!!!!!!!!!!
-        String url = ersterFilm.arr[DatenFilm.FILM_URL];
-        if (!url.isEmpty()) {
+        if (ersterFilm.getUrls().containsKey(Qualities.NORMAL)) {
             DatenDownload d = new DatenDownload(pSet, ersterFilm, DatenDownload.QUELLE_BUTTON, null, "", "", aufloesung);
             d.start = new Start();
             starten.startStarten(d);
             // gestartete Filme (originalURL des Films) auch in die History eintragen
-            daten.history.zeileSchreiben(ersterFilm.arr[DatenFilm.FILM_THEMA], ersterFilm.arr[DatenFilm.FILM_TITEL], d.arr[DatenDownload.DOWNLOAD_HISTORY_URL]);
+            daten.history.zeileSchreiben(ersterFilm.getThema(), ersterFilm.getTitel(), d.arr[DatenDownload.DOWNLOAD_HISTORY_URL]);
             daten.getListeFilmeHistory().add(ersterFilm);
             // und jetzt noch in die Downloadliste damit die Farbe im Tab Filme passt
             daten.getListeDownloadsButton().addMitNummer(d);
@@ -192,14 +197,16 @@ public class StarterClass {
             text.add("Ziel: " + datenDownload.arr[DatenDownload.DOWNLOAD_ZIEL_PFAD_DATEINAME]);
         }
         text.add("Startzeit: " + FormatterUtil.FORMATTER_HHmmss.format(start.startZeit));
-        text.add("Endzeit: " + FormatterUtil.FORMATTER_HHmmss.format(new Datum().getTime()));
+        LocalDateTime now = LocalDateTime.now();
+        text.add("Endzeit: " + FormatterUtil.FORMATTER_HHmmss.format(now));
         text.add("Restarts: " + start.countRestarted);
-        text.add("Dauer: " + start.startZeit.diffInSekunden() + " s");
-        long dauer = start.startZeit.diffInMinuten();
+        final Duration duration = Duration.between(start.startZeit, now);
+        text.add("Dauer: " + duration.getSeconds() + " s");
+        long dauer = TimeUnit.NANOSECONDS.toMinutes(duration.getNano());
         if (dauer == 0) {
             text.add("Dauer: <1 Min.");
         } else {
-            text.add("Dauer: " + start.startZeit.diffInMinuten() + " Min");
+            text.add("Dauer: " + dauer + " Min");
         }
         if (datenDownload.art == DatenDownload.ART_DOWNLOAD) {
             if (start.mVInputStream != null) {
@@ -344,7 +351,7 @@ public class StarterClass {
          * @param datenDownload The {@link mediathek.daten.DatenDownload} info object for download.
          */
         private void startStarten(DatenDownload datenDownload) {
-            datenDownload.start.startZeit = new Datum();
+            datenDownload.start.startZeit = LocalDateTime.now();
             Listener.notify(Listener.EREIGNIS_ART_DOWNLOAD_PROZENT, StarterClass.class.getName());
             Thread downloadThread;
 
