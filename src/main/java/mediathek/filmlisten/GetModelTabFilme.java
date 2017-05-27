@@ -20,14 +20,25 @@
 package mediathek.filmlisten;
 
 import de.mediathekview.mlib.daten.DatenFilm;
+import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.daten.ListeFilme;
+import de.mediathekview.mlib.daten.Qualities;
 import mediathek.config.Daten;
 import mediathek.tool.Filter;
 import mediathek.tool.MVTable;
 import mediathek.tool.TModel;
 import mediathek.tool.TModelFilm;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GetModelTabFilme {
+    private static final String[] COLUMN_NAMES = new String[] {"Nr", "Sender", "Thema", "Titel",
+            "", "", "Datum", "Zeit", "Dauer", "Größe [MB]", "HD", "UT",
+            "Beschreibung", "Geo", "Url", "Website", "Abo",
+            "Url Untertitel", "Url RTMP", "Url Auth", "Url Klein", "Url RTMP Klein", "Url HD", "Url RTMP HD", "Url History", "neu",
+            "DatumL", "Ref"};;
+    private static final String THEMA_LIVE = "Livestream";
 
     public static synchronized void getModelTabFilme(ListeFilme listeFilme, Daten ddaten, MVTable table,
             String filterSender, String filterThema, String filterTitel, String filterThemaTitel, String filterIrgendwo,
@@ -35,11 +46,11 @@ public class GetModelTabFilme {
         // Model für die Tabelle Filme zusammenbauen
         if (listeFilme.isEmpty()) {
             // wenn die Liste leer ist, dann Tschüss
-            table.setModel(new TModelFilm(new Object[][]{}, DatenFilm.COLUMN_NAMES));
+            table.setModel(new TModelFilm(new Object[][]{}, COLUMN_NAMES));
             return;
         }
         // dann ein neues Model anlegen
-        TModel tModel = new TModelFilm(new Object[][]{}, DatenFilm.COLUMN_NAMES);
+        TModel tModel = new TModelFilm(new Object[][]{}, COLUMN_NAMES);
         if (filterSender.isEmpty() && filterThema.isEmpty() && filterTitel.isEmpty() && filterThemaTitel.isEmpty() && filterIrgendwo.isEmpty() && laenge == 0
                 && !keineAbos && !kGesehen && !nurHd && !nurUt && !live && !nurNeue) {
             // dann ganze Liste laden
@@ -75,19 +86,19 @@ public class GetModelTabFilme {
                     arrIrgendwo[i] = arrIrgendwo[i].trim().toLowerCase();
                 }
             }
-            for (DatenFilm film : listeFilme) {
+            for (Film film : listeFilme) {
                 if (nurNeue) {
-                    if (!film.isNew()) {
+                    if (!film.isNeu()) {
                         continue;
                     }
                 }
                 if (live) {
-                    if (!film.arr[DatenFilm.FILM_THEMA].equals(ListeFilme.THEMA_LIVE)) {
+                    if (!film.getThema().equals(THEMA_LIVE)) {
                         continue;
                     }
                 }
                 if (nurHd) {
-                    if (!film.isHD()) {
+                    if (!film.hasHD()) {
                         continue;
                     }
                 }
@@ -97,12 +108,12 @@ public class GetModelTabFilme {
                     }
                 }
                 if (keineAbos) {
-                    if (!film.arr[DatenFilm.FILM_ABO_NAME].isEmpty()) {
+                    if (!ddaten.getListeAbo().hasAbo(film)) {
                         continue;
                     }
                 }
                 if (kGesehen) {
-                    if (ddaten.history.urlPruefen(film.getUrlHistory())) {
+                    if (ddaten.history.urlPruefen(film.getUrl(Qualities.NORMAL))) {
                         continue;
                     }
                 }
@@ -122,42 +133,22 @@ public class GetModelTabFilme {
     //===================================
     private static void addObjectDataTabFilme(ListeFilme listefilme, TModel tModel) {
         if (!listefilme.isEmpty()) {
-            for (DatenFilm film : listefilme) {
+            for (Film film : listefilme) {
                 addObjectDataTabFilme(tModel, film);
             }
         }
     }
 
-    private static void addObjectDataTabFilme(TModel tModel, DatenFilm film) {
-        Object[] object = new Object[DatenFilm.MAX_ELEM];
-        for (int m = 0; m < DatenFilm.MAX_ELEM; ++m) {
-            switch (m) {
-                case DatenFilm.FILM_NR:
-                    object[m] = film.nr;
-                    break;
-                case DatenFilm.FILM_DATUM:
-                    object[m] = film.datumFilm;
-                    break;
-                case DatenFilm.FILM_GROESSE:
-                    object[m] = film.dateigroesseL;
-                    break;
-                case DatenFilm.FILM_REF:
-                    object[m] = film;
-                    break;
-                case DatenFilm.FILM_NEU:
-                    object[m] = film.isNew() ? "1" : "0";
-                    break;
-                case DatenFilm.FILM_HD:
-                    object[m] = film.isHD() ? "1" : "0";
-                    break;
-                case DatenFilm.FILM_UT:
-                    object[m] = film.hasUT() ? "1" : "0";
-                    break;
-                default:
-                    object[m] = film.arr[m];
-                    break;
-            }
-        }
-        tModel.addRow(object);
+    private static void addObjectDataTabFilme(TModel tModel, Film film) {
+        List<Object> objects = new ArrayList<>();
+        objects.add(film.getUuid());
+        objects.add(film.getTime());
+        objects.add(film.getFileSize(Qualities.NORMAL));
+        objects.add(film);
+        objects.add(film.isNeu() ? "1" : "0");
+        objects.add(film.hasHD() ? "1" : "0");
+        objects.add(film.hasUT() ? "1" : "0");
+
+        tModel.addRow(objects.toArray());
     }
 }

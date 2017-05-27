@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import de.mediathekview.mlib.daten.DatenFilm;
+import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.daten.ListeFilme;
 import de.mediathekview.mlib.tool.Duration;
 import de.mediathekview.mlib.tool.Listener;
@@ -196,7 +197,7 @@ public class ListeBlacklist extends LinkedList<DatenBlacklist> {
      * @param film item to te tested
      * @return true if item should be displayed.
      */
-    public synchronized boolean checkBlackOkFilme_Downloads(DatenFilm film) {
+    public synchronized boolean checkBlackOkFilme_Downloads(Film film) {
         // hier werden die Filme für Downloads gesucht, Zeit ist "0"
         // ob die Blackliste dafür verwendet werden soll, ist schon geklärt
         loadCurrentFilterSettings();

@@ -26,21 +26,25 @@ import de.mediathekview.mlib.tool.Log;
 import java.net.URI;
 
 public class MVUsedUrl implements Comparable<MVUsedUrl> {
-
+    public static final String[] title = {"Datum", "Thema", "Titel", "Url"};
     private static final GermanStringSorter sorter = GermanStringSorter.getInstance();
     private final static String TRENNER = "  |###|  ";
     private final static String PAUSE = " |#| ";
+    public static final int DATUM_TABLE_COLUMNNUMBER = 0;
+    public static final int THEMA_TABLE_COLUMNNUMBER = 1;
+    public static final int TITLE_TABLE_COLUMNNUMBER = 2;
+    public static final int URL_TABLE_COLUMNNUMBER = 3;
 
 
     private String dateAsText;
     private String thema;
-    private String title;
+    private String filmTitle;
     private URI url;
 
-    public MVUsedUrl(String aDate, String aThema, String aTitle, URI aUrl) {
+    public MVUsedUrl(String aDate, String aThema, String aFilmTitle, URI aUrl) {
         dateAsText = aDate;
         thema= aThema;
-        title = aTitle;
+        filmTitle = aFilmTitle;
         url = aUrl;
     }
 
@@ -54,7 +58,7 @@ public class MVUsedUrl implements Comparable<MVUsedUrl> {
     public String getUsedUrl() {
         return dateAsText + PAUSE
                 + Functions.textLaenge(25, putzen(thema), false /* mitte */, false /*addVorne*/) + PAUSE
-                + Functions.textLaenge(40, putzen(title), false /* mitte */, false /*addVorne*/) + TRENNER
+                + Functions.textLaenge(40, putzen(filmTitle), false /* mitte */, false /*addVorne*/) + TRENNER
                 + url + '\n';
     }
 
@@ -90,7 +94,7 @@ public class MVUsedUrl implements Comparable<MVUsedUrl> {
     }
 
     public String getString() {
-        return Functions.textLaenge(40, title, false /* mitte */, false /*addVorne*/)
+        return Functions.textLaenge(40, filmTitle, false /* mitte */, false /*addVorne*/)
                 + "    " + Functions.textLaenge(25, thema, false /* mitte */, false /*addVorne*/)
                 + "    " + (dateAsText.isEmpty() ? "          " : dateAsText)
                 + "    " + url;
@@ -100,9 +104,25 @@ public class MVUsedUrl implements Comparable<MVUsedUrl> {
         return url;
     }
 
+    public String getDateAsText()
+    {
+        return dateAsText;
+    }
+
+    public String getThema()
+    {
+        return thema;
+    }
+
+    public String getFilmTitle()
+    {
+        return filmTitle;
+    }
+
+
     @Override
     public int compareTo(MVUsedUrl arg0) {
-        return sorter.compare(title, arg0.title);
+        return sorter.compare(filmTitle, arg0.filmTitle);
     }
 
     private static String putzen(String s) {

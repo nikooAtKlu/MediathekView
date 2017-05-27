@@ -20,6 +20,8 @@
 package mediathek.daten;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -89,7 +91,6 @@ public final class DatenDownload extends MVData<DatenDownload> {
     public static final int DOWNLOAD_UNTERBROCHEN = 17;
     public static final int DOWNLOAD_GEO = 18;
     public static final int DOWNLOAD_FILM_URL = 19;
-    public static final int DOWNLOAD_HISTORY_URL = 20;
     public static final int DOWNLOAD_URL = 21;
     public static final int DOWNLOAD_URL_RTMP = 22;
     public static final int DOWNLOAD_URL_SUBTITLE = 23;
@@ -244,7 +245,13 @@ public final class DatenDownload extends MVData<DatenDownload> {
         if (film != null) {
             aDaten.getListeFilmeHistory().add(film);
         }
-        aDaten.history.zeileSchreiben(arr[DatenDownload.DOWNLOAD_THEMA], arr[DatenDownload.DOWNLOAD_TITEL], arr[DatenDownload.DOWNLOAD_HISTORY_URL]);
+        try
+        {
+            aDaten.history.zeileSchreiben(arr[DatenDownload.DOWNLOAD_THEMA], arr[DatenDownload.DOWNLOAD_TITEL], new URI(arr[DatenDownload.DOWNLOAD_URL]));
+        }catch (URISyntaxException uriSyntaxException)
+        {
+            Log.errorLog(420001, uriSyntaxException);
+        }
         Listener.notify(Listener.EREIGNIS_START_EVENT, this.getClass().getSimpleName());
     }
 
@@ -254,10 +261,16 @@ public final class DatenDownload extends MVData<DatenDownload> {
         LinkedList<MVUsedUrl> urlList = new LinkedList<>();
         for (DatenDownload d : downloads) {
             d.start = new Start();
-            urlList.add(new MVUsedUrl(zeit,
-                    d.arr[DatenDownload.DOWNLOAD_THEMA],
-                    d.arr[DatenDownload.DOWNLOAD_TITEL],
-                    d.arr[DatenDownload.DOWNLOAD_HISTORY_URL]));
+            try
+            {
+                urlList.add(new MVUsedUrl(zeit,
+                        d.arr[DatenDownload.DOWNLOAD_THEMA],
+                        d.arr[DatenDownload.DOWNLOAD_TITEL],
+                        new URI(d.arr[DatenDownload.DOWNLOAD_URL])));
+            }catch (URISyntaxException uriSyntaxException)
+            {
+                Log.errorLog(420002, uriSyntaxException);
+            }
         }
         if (!urlList.isEmpty()) {
             ddaten.history.zeilenSchreiben(urlList);

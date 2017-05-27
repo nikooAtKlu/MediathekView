@@ -19,8 +19,10 @@
  */
 package mediathek.daten;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import de.mediathekview.mlib.daten.Film;
+import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.Listener;
+import de.mediathekview.mlib.tool.Log;
 import de.mediathekview.mlib.tool.SysMsg;
 import mediathek.config.Daten;
 import mediathek.config.Konstanten;
@@ -32,7 +34,10 @@ import mediathek.tool.TModel;
 import mediathek.tool.TModelDownload;
 
 import javax.swing.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -67,10 +72,8 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
         SysMsg.sysMsg("Filme in Downloads eintragen");
         this.stream().filter(d -> d.film == null)
                 .forEach(d ->
-                {
-                    d.film = daten.getListeFilme().getFilmByUrl_klein_hoch_hd(d.arr[DatenDownload.DOWNLOAD_URL]);
-                    d.setGroesseFromFilm();
-                });
+                    d.film = daten.getListeFilme().getFilmByUrl_klein_hoch_hd(d.arr[DatenDownload.DOWNLOAD_URL])
+                );
     }
 
     public synchronized void listePutzen() {
@@ -126,7 +129,6 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
             if (d.isInterrupted()) {
                 // guter Rat teuer was da besser wäre??
                 // wird auch nach dem Neuladen der Filmliste aufgerufen: also Finger weg
-                d.setGroesseFromFilm();//bei den Abgebrochenen wird die tatsächliche Dateigröße angezeigt
                 continue;
             }
             if (!d.istAbo()) {
@@ -142,9 +144,6 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
                 //gefunden = true;
             }
         }
-//        if (gefunden) {
-//            Listener.notify(Listener.EREIGNIS_LISTE_DOWNLOADS, this.getClass().getSimpleName());
-//        }
         this.forEach(d -> d.arr[DatenDownload.DOWNLOAD_ZURUECKGESTELLT] = Boolean.FALSE.toString());
     }
 
@@ -240,9 +239,9 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
         }
     }
 
-    public synchronized DatenDownload getDownloadUrlFilm(String urlFilm) {
+    public synchronized DatenDownload getDownloadUrlFilm(URI urlFilm) {
         for (DatenDownload datenDownload : this) {
-            if (datenDownload.arr[DatenDownload.DOWNLOAD_FILM_URL].equals(urlFilm)) {
+            if (datenDownload.arr[DatenDownload.DOWNLOAD_FILM_URL].equals(urlFilm.toString())) {
                 return datenDownload;
             }
         }
@@ -289,7 +288,7 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
                     object[i] = download.nr;
                 } else if (i == DatenDownload.DOWNLOAD_FILM_NR) {
                     if (download.film != null) {
-                        object[i] = download.film.nr;
+                        object[i] = download.film.getUuid().toString();
                     } else {
                         object[i] = 0;
                     }
@@ -376,16 +375,23 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
     public synchronized void abosSuchen(JFrame parent) {
         // in der Filmliste nach passenden Filmen suchen und 
         // in die Liste der Downloads eintragen
-        final HashSet<String> listeUrls = new HashSet<>();
+        final HashSet<URI> listeUrls = new HashSet<>();
         // mit den bereits enthaltenen URL füllen
-        this.forEach((download) -> listeUrls.add(download.arr[DatenDownload.DOWNLOAD_URL]));
+        this.forEach((download) -> {
+            try
+            {
+                listeUrls.add(new URI(download.arr[DatenDownload.DOWNLOAD_URL]));
+            } catch (URISyntaxException uriSyntacException) {
+                Log.errorLog(420003, uriSyntacException);
+            }
+        });
 
         boolean gefunden = false;
         DatenAbo abo;
         // prüfen ob in "alle Filme" oder nur "nach Blacklist" gesucht werden soll
         boolean checkWithBlackList = Boolean.parseBoolean(MVConfig.get(MVConfig.Configs.SYSTEM_BLACKLIST_AUCH_ABO));
         DatenPset pSet_ = Daten.listePset.getPsetAbo("");
-        for (DatenFilm film : daten.getListeFilme()) {
+        for (Film film : daten.getListeFilme()) {
             abo = daten.getListeAbo().getAboFuerFilm_schnell(film, true /*auch die Länge überprüfen*/);
             if (abo == null) {
                 // dann gibts dafür kein Abo
@@ -400,7 +406,7 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
                     continue;
                 }
             }
-            if (daten.erledigteAbos.urlPruefen(film.getUrlHistory())) {
+            if (daten.erledigteAbos.urlPruefen(film.getUrl(Qualities.NORMAL))) {
                 // ist schon mal geladen worden
                 continue;
             }
@@ -409,7 +415,7 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
             if (pSet != null) {
 
                 // mit der tatsächlichen URL prüfen, ob die URL schon in der Downloadliste ist
-                String urlDownload = film.getUrlFuerAufloesung(pSet.arr[DatenPset.PROGRAMMSET_AUFLOESUNG]);
+                URI urlDownload = film.getUrl(Qualities.valueOf(pSet.arr[DatenPset.PROGRAMMSET_AUFLOESUNG]));
                 if (listeUrls.contains(urlDownload)) {
                     continue;
                 }
@@ -420,7 +426,7 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
                 //                }
 
                 //diesen Film in die Downloadliste eintragen
-                abo.arr[DatenAbo.ABO_DOWN_DATUM] = FormatterUtil.FORMATTER_ddMMyyyy.format(new Date());
+                abo.arr[DatenAbo.ABO_DOWN_DATUM] = FormatterUtil.FORMATTER_ddMMyyyy.format(LocalDateTime.now());
                 if (!abo.arr[DatenAbo.ABO_PSET].equals(pSet.arr[DatenPset.PROGRAMMSET_NAME])) {
                     // nur den Namen anpassen, falls geändert
                     abo.arr[DatenAbo.ABO_PSET] = pSet.arr[DatenPset.PROGRAMMSET_NAME];

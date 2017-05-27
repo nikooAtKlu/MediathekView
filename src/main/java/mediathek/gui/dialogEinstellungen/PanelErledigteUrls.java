@@ -19,7 +19,8 @@
  */
 package mediathek.gui.dialogEinstellungen;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import de.mediathekview.mlib.daten.Film;
+import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.Listener;
 import mediathek.config.Daten;
 import mediathek.controller.MVUsedUrl;
@@ -254,7 +255,7 @@ public class PanelErledigteUrls extends PanelVorlage {
         BeobLoeschen beobLoeschen = new BeobLoeschen();
         BeobUrl beobUrl = new BeobUrl();
         private Point p;
-        DatenFilm film;
+        Film film;
 
         @Override
         public void mousePressed(MouseEvent arg0) {
@@ -275,7 +276,7 @@ public class PanelErledigteUrls extends PanelVorlage {
             int nr = jTable1.rowAtPoint(p);
             if (nr >= 0) {
                 jTable1.setRowSelectionInterval(nr, nr);
-                String url = jTable1.getValueAt(jTable1.convertRowIndexToModel(nr), MVUsedUrl.USED_URL_URL).toString();
+                String url = jTable1.getValueAt(jTable1.convertRowIndexToModel(nr), MVUsedUrl.URL_TABLE_COLUMNNUMBER).toString();
                 film = daten.getListeFilme().getFilmByUrl(url);
             }
             JPopupMenu jPopupMenu = new JPopupMenu();
@@ -308,7 +309,7 @@ public class PanelErledigteUrls extends PanelVorlage {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                DatenDownload datenDownload = daten.getListeDownloads().getDownloadUrlFilm(film.arr[DatenFilm.FILM_URL]);
+                DatenDownload datenDownload = daten.getListeDownloads().getDownloadUrlFilm(film.getUrl(Qualities.NORMAL));
                 if (datenDownload != null) {
                     int ret = JOptionPane.showConfirmDialog(parentComponent, "Download für den Film existiert bereits.\n"
                             + "Noch einmal anlegen?", "Anlegen?", JOptionPane.YES_NO_OPTION);
@@ -339,7 +340,7 @@ public class PanelErledigteUrls extends PanelVorlage {
             public void actionPerformed(ActionEvent e) {
                 int selectedTableRow = jTable1.getSelectedRow();
                 if (selectedTableRow >= 0) {
-                    String del = jTable1.getValueAt(jTable1.convertRowIndexToModel(selectedTableRow), MVUsedUrl.USED_URL_URL).toString();
+                    String del = jTable1.getValueAt(jTable1.convertRowIndexToModel(selectedTableRow), MVUsedUrl.URL_TABLE_COLUMNNUMBER).toString();
                     GuiFunktionen.copyToClipboard(del);
                 }
 
@@ -352,7 +353,7 @@ public class PanelErledigteUrls extends PanelVorlage {
             public void actionPerformed(ActionEvent e) {
                 int selectedTableRow = jTable1.getSelectedRow();
                 if (selectedTableRow >= 0) {
-                    String del = jTable1.getValueAt(jTable1.convertRowIndexToModel(selectedTableRow), MVUsedUrl.USED_URL_URL).toString();
+                    String del = jTable1.getValueAt(jTable1.convertRowIndexToModel(selectedTableRow), MVUsedUrl.URL_TABLE_COLUMNNUMBER).toString();
                     if (abo) {
                         daten.erledigteAbos.urlAusLogfileLoeschen(del);
                     } else {

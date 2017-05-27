@@ -11,7 +11,7 @@ import org.apache.commons.lang3.time.FastDateFormat;
  * Since {@link FastDateFormat} is threadsafe we can use it this way.
  */
 public final class FormatterUtil {
-    public static final DateTimeFormatter FORMATTER_ddMMyyyy = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    public static final DateTimeFormatter FORMATTER_ddMMyyyy = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
     public static final DateTimeFormatter FORMATTER_yyyyMMdd = DateTimeFormatter.ofPattern("yyyyMMdd");
     public static final DateTimeFormatter FORMATTER_HHmmss = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM);
     public static final DateTimeFormatter FORMATTER_ddMMyyyyHHmm = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm");

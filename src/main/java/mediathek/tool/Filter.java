@@ -19,7 +19,7 @@
  */
 package mediathek.tool;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import de.mediathekview.mlib.daten.Film;
 import mediathek.config.MVColor;
 import mediathek.daten.DatenAbo;
 
@@ -67,31 +67,30 @@ public class Filter {
     }
 
     public static boolean filterAufFilmPruefen(String senderSuchen, String themaSuchen,
-            String[] titelSuchen, String[] themaTitelSuchen, String[] irgendwoSuchen, int laengeMinutenSuchen, boolean min,
-            DatenFilm film, boolean mitLaenge) {
+                                               String[] titelSuchen, String[] themaTitelSuchen, String[] irgendwoSuchen, int laengeMinutenSuchen, boolean min,
+                                               Film film, boolean mitLaenge) {
         // prüfen ob xxxSuchen im String imXxx enthalten ist, themaTitelSuchen wird mit Thema u. Titel verglichen
         // senderSuchen exakt mit sender
         // themaSuchen exakt mit thema
         // titelSuchen muss im Titel nur enthalten sein
 
-        if (senderSuchen.isEmpty() || film.arr[DatenFilm.FILM_SENDER].equalsIgnoreCase(senderSuchen)) {
-            if (themaSuchen.isEmpty() || film.arr[DatenFilm.FILM_THEMA].equalsIgnoreCase(themaSuchen)) {
+        if (senderSuchen.isEmpty() || film.getSender().getName().equalsIgnoreCase(senderSuchen)) {
+            if (themaSuchen.isEmpty() || film.getThema().equalsIgnoreCase(themaSuchen)) {
 
-                if (titelSuchen.length == 0 || pruefen(titelSuchen, film.arr[DatenFilm.FILM_TITEL])) {
+                if (titelSuchen.length == 0 || pruefen(titelSuchen, film.getTitel())) {
 
                     if (themaTitelSuchen.length == 0
-                            || pruefen(themaTitelSuchen, film.arr[DatenFilm.FILM_THEMA])
-                            || pruefen(themaTitelSuchen, film.arr[DatenFilm.FILM_TITEL])) {
+                            || pruefen(themaTitelSuchen, film.getThema())
+                            || pruefen(themaTitelSuchen, film.getTitel())) {
 
                         if (irgendwoSuchen.length == 0
-                                || pruefen(irgendwoSuchen, film.arr[DatenFilm.FILM_DATUM])
-                                || pruefen(irgendwoSuchen, film.arr[DatenFilm.FILM_THEMA])
-                                || pruefen(irgendwoSuchen, film.arr[DatenFilm.FILM_TITEL])
-                                || pruefen(irgendwoSuchen, film.arr[DatenFilm.FILM_BESCHREIBUNG])) {
-                            // || pruefen(irgendwoSuchen, film.arr[DatenFilm.FILM_WEBSEITE_NR])) { kostet 25% Zeit zusätzlich!
+                                || pruefen(irgendwoSuchen, film.getTime().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm))
+                                || pruefen(irgendwoSuchen, film.getThema())
+                                || pruefen(irgendwoSuchen, film.getTitel())
+                                || pruefen(irgendwoSuchen, film.getBeschreibung())) {
                             if (mitLaenge) {
                                 // die Länge soll mit gefrüft werden
-                                if (laengePruefen(laengeMinutenSuchen, film.dauerL, min)) {
+                                if (laengePruefen(laengeMinutenSuchen, film.getDuration().getSeconds(), min)) {
                                     return true;
                                 }
                             } else {

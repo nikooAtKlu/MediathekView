@@ -49,7 +49,7 @@ public class MVUsedUrls {
         this.settingsDir = settingsDir;
         this.notifyEvent = notifyEvent;
         listeUrlsSortDate = new LinkedList<>();
-        listeUrls = new HashSet<String>() {
+        listeUrls = new HashSet<URI>() {
             @Override
             public void clear() {
                 listeUrlsSortDate.clear();
@@ -98,7 +98,9 @@ public class MVUsedUrls {
         Iterator<MVUsedUrl> iterator = listeUrlsSortDate.iterator();
         final Object[][] object = new Object[listeUrlsSortDate.size()][];
         while (iterator.hasNext()) {
-            object[i] = iterator.next().;
+            final MVUsedUrl data = iterator.next();
+            String[] tableLine = new String[]{data.getDateAsText(),data.getThema(),data.getFilmTitle(),data.getUrl().toString()};
+            object[i] = tableLine;
             ++i;
         }
         return object;
