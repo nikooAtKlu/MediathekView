@@ -20,99 +20,112 @@
 package mediathek.tool;
 
 import mediathek.config.MVConfig;
+import mediathek.daten.FilmCoulumns;
 
 import javax.swing.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.*;
 
-public class BeobTableHeader extends MouseAdapter {
+public class BeobTableHeader extends MouseAdapter
+{
     //rechhte Maustaste in der Tabelle
 
-    MVTable tabelle;
-    String[] columns;
-    boolean[] spaltenAnzeigen;
-    JCheckBoxMenuItem[] box;
-    int[] ausblenden;
-    int[] button;
-    boolean icon = false;
+    private MVTable tabelle;
+    private LinkedHashMap<FilmCoulumns, Boolean> columns;
+    private LinkedHashMap<FilmCoulumns, JButton> buttons;
+    private LinkedHashMap<FilmCoulumns,JCheckBoxMenuItem> box;
+    private boolean icon = false;
     MVConfig.Configs configs;
 
-    public BeobTableHeader(MVTable tabelle, String[] columns, boolean[] spalten, int[] aausblenden, int[] bbutton, boolean icon, MVConfig.Configs configs) {
+    public BeobTableHeader(MVTable tabelle, Collection<FilmCoulumns> aColumns, Collection<FilmCoulumns> aColumnsNotToShow, boolean icon, MVConfig.Configs configs)
+    {
         this.tabelle = tabelle;
-        this.columns = columns;
         this.icon = icon;
-        spaltenAnzeigen = spalten;
-        this.ausblenden = aausblenden;
         this.configs = configs;
-        button = bbutton;
+
+        box = new LinkedHashMap<>();
+        buttons = new LinkedHashMap<>();
+        columns = new LinkedHashMap<>();
+        for (FilmCoulumns filmCoulumn : aColumns)
+        {
+            columns.put(filmCoulumn, aColumnsNotToShow == null || aColumnsNotToShow.isEmpty() || !aColumnsNotToShow.contains(filmCoulumn));
+        }
     }
 
     @Override
-    public void mousePressed(MouseEvent arg0) {
-        if (arg0.isPopupTrigger()) {
+    public void mousePressed(MouseEvent arg0)
+    {
+        if (arg0.isPopupTrigger())
+        {
             showMenu(arg0);
         }
     }
 
     @Override
-    public void mouseReleased(MouseEvent arg0) {
-        if (arg0.isPopupTrigger()) {
+    public void mouseReleased(MouseEvent arg0)
+    {
+        if (arg0.isPopupTrigger())
+        {
             showMenu(arg0);
         }
     }
 
-    private boolean immer(int i) {
-        for (int ii : ausblenden) {
-            if (i == ii) {
-                return true;
-            }
-        }
-        return false;
-    }
 
-    private void showMenu(MouseEvent evt) {
+    private void showMenu(MouseEvent evt)
+    {
         JPopupMenu jPopupMenu = new JPopupMenu();
         // Spalten ein-ausschalten
-        box = new JCheckBoxMenuItem[this.columns.length];
-        for (int i = 0; i < columns.length; ++i) {
-            if (immer(i)) {
+        for (FilmCoulumns filmCoulumn : columns.keySet())
+        {
+            if (!columns.get(filmCoulumn))
+            {
                 continue;
             }
-            box[i] = new JCheckBoxMenuItem(columns[i]);
-            box[i].setSelected(anzeigen(i));
-            box[i].addActionListener(e -> setSpalten());
-            jPopupMenu.add(box[i]);
+            final JCheckBoxMenuItem neueCheckbox = new JCheckBoxMenuItem(filmCoulumn.getName());
+            box.put(filmCoulumn,neueCheckbox);
+            neueCheckbox.setSelected(columns.get(filmCoulumn));
+            neueCheckbox.addActionListener(e -> setSpalten());
+            jPopupMenu.add(neueCheckbox);
         }
         // jetzt evtl. noch die Button
-        if (button.length > 0) {
+        if (!buttons.isEmpty())
+        {
             //##Trenner##
             jPopupMenu.addSeparator();
             //##Trenner##
             final JCheckBoxMenuItem item2 = new JCheckBoxMenuItem("Button anzeigen");
-            item2.setSelected(anzeigen(button[0])); //entweder alle oder keiner!
-            item2.addActionListener(e -> {
-                for (int i : button) {
-                    setSpalten(i, item2.isSelected());
+            item2.setSelected(columns.get(buttons.keySet().iterator().next())); //entweder alle oder keiner!
+            item2.addActionListener(e ->
+            {
+                for (JButton button : buttons.values())
+                {
+                    button.setSelected(item2.isSelected());
                 }
             });
             jPopupMenu.add(item2);
         }
-        if (icon) {
+        if (icon)
+        {
             //##Trenner##
             jPopupMenu.addSeparator();
             final JCheckBoxMenuItem item3 = new JCheckBoxMenuItem("Icons anzeigen");
             item3.setSelected(tabelle.iconAnzeigen);
-            item3.addActionListener(e -> {
+            item3.addActionListener(e ->
+            {
                 tabelle.iconAnzeigen = item3.isSelected();
                 setSpalten();
             });
             jPopupMenu.add(item3);
             final JCheckBoxMenuItem item2 = new JCheckBoxMenuItem("kleine Icons anzeigen");
             item2.setSelected(tabelle.iconKlein);
-            if (!tabelle.iconAnzeigen) {
+            if (!tabelle.iconAnzeigen)
+            {
                 item2.setEnabled(false);
-            } else {
-                item2.addActionListener(e -> {
+            } else
+            {
+                item2.addActionListener(e ->
+                {
                     tabelle.iconKlein = item2.isSelected();
                     setSpalten();
                 });
@@ -124,7 +137,8 @@ public class BeobTableHeader extends MouseAdapter {
         // Tabellenspalten umbrechen
         JCheckBoxMenuItem itemBr = new JCheckBoxMenuItem("Zeilen umbrechen");
         itemBr.setSelected(tabelle.lineBreak);
-        itemBr.addActionListener(e -> {
+        itemBr.addActionListener(e ->
+        {
             tabelle.lineBreak = itemBr.isSelected();
             MVConfig.add(configs, Boolean.toString(itemBr.isSelected()));
             setSpalten();
@@ -141,23 +155,16 @@ public class BeobTableHeader extends MouseAdapter {
         jPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
     }
 
-    private boolean anzeigen(int i) {
-        return spaltenAnzeigen == null || spaltenAnzeigen[i];
-    }
 
-    private void setSpalten() {
-        for (int i = 0; i < box.length; ++i) {
-            if (box[i] != null) {
-                spaltenAnzeigen[i] = box[i].isSelected();
-            }
+    private void setSpalten()
+    {
+        for (FilmCoulumns boxKey : box.keySet())
+        {
+                columns.replace(boxKey,box.get(boxKey).isSelected());
         }
         tabelle.spaltenEinAus();
         tabelle.setHeight();
     }
 
-    private void setSpalten(int k, boolean anz) {
-        spaltenAnzeigen[k] = anz;
-        tabelle.spaltenEinAus();
-    }
 
 }

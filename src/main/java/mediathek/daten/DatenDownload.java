@@ -143,7 +143,7 @@ public final class DatenDownload extends MVData<DatenDownload> {
         makeArr();
     }
 
-    public DatenDownload(DatenPset pSet, Film film, byte quelle, DatenAbo abo, String name, String pfad, String aufloesung) {
+    public DatenDownload(DatenPset pSet, Film film, byte quelle, DatenAbo abo, String name, String pfad, Qualities aufloesung) {
         makeArr();
         this.film = film;
         this.pSet = pSet;

@@ -177,7 +177,7 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
         return ret;
     }
 
-    public synchronized void delDownloadButton(String url) {
+    public synchronized void delDownloadButton(URI url) {
         Iterator<DatenDownload> it = this.iterator();
         DatenDownload datenDownload;
         while (it.hasNext()) {
