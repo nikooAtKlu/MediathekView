@@ -19,7 +19,9 @@
  */
 package mediathek.filmlisten;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import java.util.ArrayList;
+import java.util.List;
+
 import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.daten.ListeFilme;
 import de.mediathekview.mlib.daten.Qualities;
@@ -28,9 +30,6 @@ import mediathek.tool.Filter;
 import mediathek.tool.MVTable;
 import mediathek.tool.TModel;
 import mediathek.tool.TModelFilm;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class GetModelTabFilme {
     private static final String[] COLUMN_NAMES = new String[] {"Nr", "Sender", "Thema", "Titel",
