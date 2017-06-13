@@ -19,7 +19,57 @@
  */
 package mediathek.gui;
 
+import static mediathek.tool.MVTable.SORT_ASCENDING;
+import static mediathek.tool.MVTable.SORT_DESCENDING;
+import static mediathek.tool.MVTable.sortKeyLesen;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Event;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.print.PrinterException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Optional;
+
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.RowSorter;
+import javax.swing.RowSorter.SortKey;
+import javax.swing.SortOrder;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 import com.jidesoft.utils.SystemInfo;
+
 import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.daten.ListeFilme;
 import de.mediathekview.mlib.daten.Qualities;
@@ -33,29 +83,27 @@ import mediathek.config.Daten;
 import mediathek.config.Icons;
 import mediathek.config.MVConfig;
 import mediathek.controller.starter.Start;
-import mediathek.daten.*;
+import mediathek.daten.DatenAbo;
+import mediathek.daten.DatenBlacklist;
+import mediathek.daten.DatenDownload;
+import mediathek.daten.DatenPset;
+import mediathek.daten.FilmCoulumns;
+import mediathek.daten.ListePset;
 import mediathek.filmlisten.GetModelTabFilme;
 import mediathek.gui.dialog.DialogAboNoSet;
 import mediathek.gui.dialog.DialogAddDownload;
 import mediathek.gui.dialog.DialogAddMoreDownload;
 import mediathek.gui.dialog.DialogEditAbo;
 import mediathek.gui.filmInformation.IFilmInformation;
-import mediathek.tool.*;
-
-import javax.swing.*;
-import javax.swing.RowSorter.SortKey;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.print.PrinterException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Optional;
-
-import static mediathek.tool.MVTable.*;
+import mediathek.tool.BeobTableHeader;
+import mediathek.tool.CellRendererFilme;
+import mediathek.tool.Filter;
+import mediathek.tool.GuiFunktionen;
+import mediathek.tool.HinweisKeineAuswahl;
+import mediathek.tool.MVMessageDialog;
+import mediathek.tool.MVTable;
+import mediathek.tool.TModel;
+import mediathek.tool.TModelFilm;
 
 @SuppressWarnings("serial")
 public class GuiFilme extends PanelVorlage {
@@ -503,7 +551,7 @@ public class GuiFilme extends PanelVorlage {
                 if (pSet == null) {
                     pSet = Daten.listePset.getListeSpeichern().getFirst();
                 }
-                datenDownload = new DatenDownload(pSet, datenFilm, DatenDownload.QUELLE_DOWNLOAD, null, "", pfad, ""/*Auflösung*/);
+                datenDownload = new DatenDownload(pSet, datenFilm, DatenDownload.QUELLE_DOWNLOAD, null, "", pfad, null/*Auflösung*/);
                 datenDownload.arr[DatenDownload.DOWNLOAD_INFODATEI] = Boolean.toString(info);
                 datenDownload.arr[DatenDownload.DOWNLOAD_SUBTITLE] = Boolean.toString(subtitle);
 
@@ -541,7 +589,7 @@ public class GuiFilme extends PanelVorlage {
             }
             Optional<Film> filmSelection = getCurrentlySelectedFilm();
             if (filmSelection.isPresent()) {
-                daten.starterClass.urlMitProgrammStarten(pSet, filmSelection.get(), aufloesung == null ? "" : aufloesung.getDescription());
+                daten.starterClass.urlMitProgrammStarten(pSet, filmSelection.get(), aufloesung == null ? null : aufloesung);
             }
         }
     }

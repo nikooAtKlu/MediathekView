@@ -19,11 +19,20 @@
  */
 package mediathek.controller.starter;
 
+import java.awt.Toolkit;
+import java.io.File;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.SwingUtilities;
+
 import com.apple.eawt.Application;
 import com.jidesoft.utils.SystemInfo;
+
 import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.daten.Qualities;
-import de.mediathekview.mlib.tool.Datum;
 import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
 import de.mediathekview.mlib.tool.SysMsg;
@@ -36,16 +45,6 @@ import mediathek.mac.SpotlightCommentWriter;
 import mediathek.tool.FormatterUtil;
 import mediathek.tool.MVFilmSize;
 import mediathek.tool.MVNotification;
-
-import javax.swing.*;
-import java.awt.*;
-import java.io.File;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 public class StarterClass {
     //Tags Filme
@@ -63,15 +62,19 @@ public class StarterClass {
         starten.start();
     }
 
-    public synchronized void urlMitProgrammStarten(DatenPset pSet, Film ersterFilm, String aufloesung) {
+    public synchronized void urlMitProgrammStarten(DatenPset pSet, Film ersterFilm, Qualities aufloesung) {
         // url mit dem Programm mit der Nr. starten (Button oder TabDownload "rechte Maustaste")
         // Quelle "Button" ist immer ein vom User gestarteter Film, also Quelle_Button!!!!!!!!!!!
         if (ersterFilm.getUrls().containsKey(Qualities.NORMAL)) {
+        	//TODO: Nicklas kontrolle
+            //DatenDownload d = new DatenDownload(pSet, ersterFilm, DatenDownload.QUELLE_BUTTON, null, "", "", aufloesung);
             DatenDownload d = new DatenDownload(pSet, ersterFilm, DatenDownload.QUELLE_BUTTON, null, "", "", aufloesung);
             d.start = new Start();
             starten.startStarten(d);
             // gestartete Filme (originalURL des Films) auch in die History eintragen
-            daten.history.zeileSchreiben(ersterFilm.getThema(), ersterFilm.getTitel(), d.arr[DatenDownload.DOWNLOAD_HISTORY_URL]);
+            //TODO: Nicklas kontrolle
+            //daten.history.zeileSchreiben(ersterFilm.getThema(), ersterFilm.getTitel(), d.arr[DatenDownload.DOWNLOAD_HISTORY_URL]);
+            daten.history.zeileSchreiben(ersterFilm.getThema(), ersterFilm.getTitel(), ersterFilm.getUrl(Qualities.NORMAL));
             daten.getListeFilmeHistory().add(ersterFilm);
             // und jetzt noch in die Downloadliste damit die Farbe im Tab Filme passt
             daten.getListeDownloadsButton().addMitNummer(d);
@@ -100,9 +103,13 @@ public class StarterClass {
             Log.errorLog(795632500, "Download fehlgeschlagen: Datei zu klein" + datenDownload.arr[DatenDownload.DOWNLOAD_ZIEL_PFAD_DATEINAME]);
         } else {
             if (datenDownload.istAbo()) {
+            	//TODO: Nicklas kontrolle
+                /*daten.erledigteAbos.zeileSchreiben(datenDownload.arr[DatenDownload.DOWNLOAD_THEMA],
+                        datenDownload.arr[DatenDownload.DOWNLOAD_TITEL],
+                        datenDownload.arr[DatenDownload.DOWNLOAD_HISTORY_URL]);*/
                 daten.erledigteAbos.zeileSchreiben(datenDownload.arr[DatenDownload.DOWNLOAD_THEMA],
                         datenDownload.arr[DatenDownload.DOWNLOAD_TITEL],
-                        datenDownload.arr[DatenDownload.DOWNLOAD_HISTORY_URL]);
+                		datenDownload.film.getUrl(Qualities.NORMAL));
             }
             ret = true;
         }
