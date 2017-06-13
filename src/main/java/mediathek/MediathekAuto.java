@@ -19,6 +19,15 @@
  */
 package mediathek;
 
+import static de.mediathekview.mlib.tool.Log.LILNE;
+import static mediathek.tool.MVFunctionSys.startMeldungen;
+
+import java.awt.SplashScreen;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
+
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLaden;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLadenEvent;
 import de.mediathekview.mlib.filmlisten.FilmlisteLesen;
@@ -29,15 +38,6 @@ import mediathek.config.MVConfig;
 import mediathek.controller.IoXmlLesen;
 import mediathek.daten.DatenDownload;
 import mediathek.tool.MVFilmSize;
-
-import java.awt.*;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.concurrent.TimeUnit;
-
-import static de.mediathekview.mlib.tool.Log.LILNE;
-import static mediathek.tool.MVFunctionSys.startMeldungen;
 
 public class MediathekAuto {
 
@@ -107,7 +107,9 @@ public class MediathekAuto {
             //do not read film descriptions in FASTAUTO mode as they won´t be used...
             FilmlisteLesen.setWorkMode(FilmlisteLesen.WorkMode.FASTAUTO);
         }
-        filmList.readFilmListe(Daten.getDateiFilmliste(), daten.getListeFilme(), Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ANZ_TAGE_FILMLISTE)));
+        //TODO: Nicklas kontrolle
+        //filmList.readFilmListe(Daten.getDateiFilmliste(), daten.getListeFilme(), Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ANZ_TAGE_FILMLISTE)));
+        filmList.readFilmListe(Daten.getDateiFilmliste(), Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ANZ_TAGE_FILMLISTE)));
 
         if (daten.getListeFilme().isTooOld()) {
             // erst neue Filmliste laden
