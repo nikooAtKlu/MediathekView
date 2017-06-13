@@ -19,17 +19,18 @@
  */
 package mediathek.gui.dialog;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+
+import de.mediathekview.mlib.daten.Film;
 import mediathek.config.Daten;
 import mediathek.config.Icons;
 import mediathek.tool.EscBeenden;
 import mediathek.tool.MVInfoFile;
 
-import javax.swing.*;
-
 @SuppressWarnings("serial")
 public class DialogFilmBeschreibung extends JDialog {
-    DatenFilm datenFilm;
+    Film datenFilm;
     JFrame paFrame;
     Daten daten;
 

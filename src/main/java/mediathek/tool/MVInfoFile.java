@@ -19,7 +19,18 @@
  */
 package mediathek.tool;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import javax.swing.JFrame;
+
+import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.tool.FilenameUtils;
 import de.mediathekview.mlib.tool.Log;
 import de.mediathekview.mlib.tool.SysMsg;
@@ -30,15 +41,9 @@ import mediathek.daten.DatenPset;
 import mediathek.daten.ListePset;
 import mediathek.gui.dialog.DialogZiel;
 
-import javax.swing.*;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 public class MVInfoFile {
 
-    public static void writeInfoFile(JFrame paFrame, Daten daten, DatenFilm film) {
+    public static void writeInfoFile(JFrame paFrame, Daten daten, Film film) {
         String titel = film.arr[DatenFilm.FILM_TITEL];
         titel = FilenameUtils.replaceLeerDateiname(titel, false /*pfad*/,
                 Boolean.parseBoolean(MVConfig.get(MVConfig.Configs.SYSTEM_USE_REPLACETABLE)),

@@ -20,6 +20,28 @@
  */
 package mediathek.gui.dialog;
 
+import java.awt.BorderLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerDateModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+
+import org.apache.commons.lang3.time.FastDateFormat;
+import org.jdesktop.swingx.JXBusyLabel;
+
 import mediathek.config.Daten;
 import mediathek.config.Icons;
 import mediathek.config.MVConfig;
@@ -27,17 +49,6 @@ import mediathek.daten.DatenDownload;
 import mediathek.file.GetFile;
 import mediathek.tool.EscBeenden;
 import mediathek.tool.FormatterUtil;
-import org.apache.commons.lang3.time.FastDateFormat;
-import org.jdesktop.swingx.JXBusyLabel;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
 @SuppressWarnings("serial")
 public class DialogBeendenZeit extends JDialog {
@@ -119,7 +130,7 @@ public class DialogBeendenZeit extends JDialog {
 
         if (!MVConfig.get(MVConfig.Configs.SYSTEM_DIALOG_DOWNLOAD_STARTEN_ZEIT).isEmpty()) {
             try {
-                String heute = FormatterUtil.FORMATTER_yyyyMMdd.format(new Date());
+                String heute = LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm);
                 heute = heute + MVConfig.get(MVConfig.Configs.SYSTEM_DIALOG_DOWNLOAD_STARTEN_ZEIT);
                 Date start = FastDateFormat.getInstance("yyyyMMddHH:mm").parse(heute);
 

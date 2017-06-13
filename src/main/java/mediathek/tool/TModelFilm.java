@@ -19,7 +19,6 @@
  */
 package mediathek.tool;
 
-import de.mediathekview.mlib.daten.DatenFilm;
 import de.mediathekview.mlib.tool.Datum;
 
 @SuppressWarnings("serial")

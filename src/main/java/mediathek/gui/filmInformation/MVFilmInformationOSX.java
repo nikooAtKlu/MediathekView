@@ -1,16 +1,34 @@
 package mediathek.gui.filmInformation;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Window;
+import java.net.URISyntaxException;
+
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+
+import org.jdesktop.swingx.JXHyperlink;
+
+import de.mediathekview.mlib.daten.Film;
 import mediathek.config.Icons;
 import mediathek.gui.actions.UrlHyperlinkAction;
 import mediathek.tool.BeobMausUrl;
-import org.jdesktop.swingx.JXHyperlink;
-
-import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.event.ChangeEvent;
-import java.awt.*;
-import java.net.URISyntaxException;
 
 /**
  * Display the current film information as a utility window.
@@ -27,7 +45,7 @@ public class MVFilmInformationOSX implements IFilmInformation {
     private JFrame parent = null;
     private final JLabel[] labelArrNames = new JLabel[DatenFilm.MAX_ELEM];
     private final JTextField[] txtArrCont = new JTextField[DatenFilm.MAX_ELEM];
-    private DatenFilm aktFilm = new DatenFilm();
+    private Film aktFilm = new Film();
     private static final ImageIcon ja_sw_16 = Icons.ICON_DIALOG_EIN_SW;
 
     private void createDialog(JFrame parent) {
@@ -189,7 +207,7 @@ public class MVFilmInformationOSX implements IFilmInformation {
     }
 
     @Override
-    public void updateCurrentFilm(DatenFilm film) {
+    public void updateCurrentFilm(Film film) {
         aktFilm = film;
         if (isVisible()) {
             updateTextFields();
@@ -233,7 +251,7 @@ public class MVFilmInformationOSX implements IFilmInformation {
     @Override
     public void stateChanged(ChangeEvent changeEvent) {
         //Whenever there is a change event, reset HUD info to nothing
-        DatenFilm emptyFilm = new DatenFilm();
+        Film emptyFilm = new Film();
         updateCurrentFilm(emptyFilm);
     }
 }

@@ -19,7 +19,26 @@
  */
 package mediathek.gui.dialog;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.Log;
 import de.mediathekview.mlib.tool.SysMsg;
@@ -30,14 +49,6 @@ import mediathek.daten.DatenProg;
 import mediathek.file.GetFile;
 import mediathek.tool.EscBeenden;
 import mediathek.tool.MVMessageDialog;
-
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
 
 @SuppressWarnings("serial")
 public class DialogEditDownload extends JDialog {

@@ -1,5 +1,27 @@
 package mediathek.gui.actions;
 
+import static de.mediathekview.mlib.tool.Functions.getCompileDate;
+import static de.mediathekview.mlib.tool.Functions.getJavaVersion;
+import static de.mediathekview.mlib.tool.Functions.getPathJar;
+import static de.mediathekview.mlib.tool.Functions.getProgVersion;
+
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
+import javax.swing.AbstractAction;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 import de.mediathekview.mlib.tool.Log;
 import de.mediathekview.mlib.tool.SysMsg;
 import mediathek.config.Daten;
@@ -8,19 +30,6 @@ import mediathek.config.MVConfig;
 import mediathek.gui.dialog.DialogZiel;
 import mediathek.tool.FormatterUtil;
 import mediathek.tool.GuiFunktionen;
-import mediathek.tool.MVFunctionSys;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-
-import static de.mediathekview.mlib.tool.Functions.*;
 
 @SuppressWarnings("serial")
 public class WriteProtocolFileAction extends AbstractAction {
@@ -76,7 +85,7 @@ public class WriteProtocolFileAction extends AbstractAction {
 
             bw.write("#####################################################");
             bw.newLine();
-            bw.write("Erstellt: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(new Date()));
+            bw.write("Erstellt: " + LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm));
             bw.newLine();
             bw.write("#####################################################");
             bw.newLine();
