@@ -19,7 +19,15 @@
  */
 package mediathek.gui;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+
+import java.net.URISyntaxException;
+
+import javax.swing.JPanel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableModel;
+
+import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.filmlisten.WriteFilmlistJson;
 import de.mediathekview.mlib.tool.DbgMsg;
 import de.mediathekview.mlib.tool.Listener;
@@ -33,15 +41,9 @@ import mediathek.tool.BeobMausUrl;
 import mediathek.tool.MVFont;
 import mediathek.tool.MVTable;
 
-import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.TableModel;
-import java.net.URISyntaxException;
-
 @SuppressWarnings("serial")
 public class PanelFilmBeschreibung extends JPanel implements ListSelectionListener {
-    private DatenFilm currentFilm = null;
+    private Film currentFilm = null;
     private MVTable table = null;
 
     public PanelFilmBeschreibung(Daten daten, MVTable table, boolean film) {
@@ -96,13 +98,13 @@ public class PanelFilmBeschreibung extends JPanel implements ListSelectionListen
     private void updateFilmData() {
         final int selectedTableRow = table.getSelectedRow();
         if (selectedTableRow >= 0) {
-            DatenFilm film;
+            Film film;
             final TableModel model = table.getModel();
             final int modelIndex = table.convertRowIndexToModel(selectedTableRow);
 
             switch (table.getTableType()) {
                 case FILME:
-                    film = (DatenFilm) model.getValueAt(modelIndex, DatenFilm.FILM_REF);
+                    film = (Film) model.getValueAt(modelIndex, DatenFilm.FILM_REF);
                     break;
 
                 case DOWNLOADS:
@@ -120,7 +122,7 @@ public class PanelFilmBeschreibung extends JPanel implements ListSelectionListen
         }
     }
 
-    private void displayFilmData(DatenFilm aaktFilm) {
+    private void displayFilmData(Film aaktFilm) {
         currentFilm = aaktFilm;
         setText();
     }
