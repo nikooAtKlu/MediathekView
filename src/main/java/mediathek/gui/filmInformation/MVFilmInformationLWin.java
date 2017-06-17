@@ -19,7 +19,34 @@
  */
 package mediathek.gui.filmInformation;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.net.URISyntaxException;
+
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+
+import org.jdesktop.swingx.JXHyperlink;
+
+import de.mediathekview.mlib.daten.Film;
 import mediathek.config.Icons;
 import mediathek.config.MVConfig;
 import mediathek.gui.actions.UrlHyperlinkAction;
@@ -27,16 +54,6 @@ import mediathek.gui.tools.NotScrollingCaret;
 import mediathek.tool.BeobMausUrl;
 import mediathek.tool.EscBeenden;
 import mediathek.tool.GuiFunktionen;
-import org.jdesktop.swingx.JXHyperlink;
-
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.net.URISyntaxException;
 
 @SuppressWarnings("serial")
 public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
@@ -48,7 +65,7 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
     private JLabel jLabelFilmUT;
     private final JLabel[] labelArrNames = new JLabel[DatenFilm.MAX_ELEM];
     private final JTextField[] txtArrCont = new JTextField[DatenFilm.MAX_ELEM];
-    private DatenFilm aktFilm = new DatenFilm();
+    private Film aktFilm = new Film();
     private final JFrame parent;
     private static final ImageIcon ja_sw_16 = Icons.ICON_DIALOG_EIN_SW;
     static Point mouseDownCompCoords;
@@ -290,7 +307,7 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
     @Override
     public void stateChanged(ChangeEvent changeEvent) {
         //Whenever there is a change event, reset HUD info to nothing
-        DatenFilm emptyFilm = new DatenFilm();
+        Film emptyFilm = new Film();
         updateCurrentFilm(emptyFilm);
     }
 

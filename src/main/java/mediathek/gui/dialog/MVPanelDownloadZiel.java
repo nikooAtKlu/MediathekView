@@ -19,7 +19,25 @@
  */
 package mediathek.gui.dialog;
 
+import java.awt.Color;
+import java.awt.FileDialog;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
+
 import com.jidesoft.utils.SystemInfo;
+
 import de.mediathekview.mlib.tool.FilenameUtils;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.config.Icons;
@@ -29,17 +47,6 @@ import mediathek.daten.DatenDownload;
 import mediathek.tool.FormatterUtil;
 import mediathek.tool.GuiFunktionen;
 import mediathek.tool.MVMessageDialog;
-
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.JTextComponent;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
 
 @SuppressWarnings("serial")
 public class MVPanelDownloadZiel extends JPanel {
@@ -189,7 +196,7 @@ public class MVPanelDownloadZiel extends JPanel {
             pfad = GuiFunktionen.getStandardDownloadPath();
         }
         if (name.isEmpty()) {
-            name = FormatterUtil.FORMATTER_yyyyMMdd.format(new Date()) + '_' + datenDownload.arr[DatenDownload.DOWNLOAD_THEMA] + '-' + datenDownload.arr[DatenDownload.DOWNLOAD_TITEL] + ".mp4";
+            name = LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm) + '_' + datenDownload.arr[DatenDownload.DOWNLOAD_THEMA] + '-' + datenDownload.arr[DatenDownload.DOWNLOAD_TITEL] + ".mp4";
         }
         String[] pathName = {pfad, name};
         GuiFunktionen.checkLengthPath(pathName);

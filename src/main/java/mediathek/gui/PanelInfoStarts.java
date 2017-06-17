@@ -19,14 +19,15 @@
  */
 package mediathek.gui;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JPanel;
+
 import mediathek.config.Daten;
 import mediathek.daten.DatenDownload;
 import mediathek.tool.TModel;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 @SuppressWarnings("serial")
 public class PanelInfoStarts extends JPanel {

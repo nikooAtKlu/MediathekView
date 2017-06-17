@@ -1,17 +1,18 @@
 package mediathek.mac;
 
-import de.mediathekview.mlib.daten.DatenFilm;
-import de.mediathekview.mlib.tool.Log;
-import mediathek.config.Daten;
-import mediathek.daten.DatenDownload;
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
-
-import javax.swing.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
+
+import javax.swing.SwingUtilities;
+
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
+import de.mediathekview.mlib.tool.Log;
+import mediathek.config.Daten;
+import mediathek.daten.DatenDownload;
 
 /**
  * Writes spotlight comments to the downloaded file on OS X.

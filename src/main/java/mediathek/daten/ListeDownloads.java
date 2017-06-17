@@ -19,6 +19,20 @@
  */
 package mediathek.daten;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.swing.JFrame;
+
 import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.Listener;
@@ -32,14 +46,6 @@ import mediathek.gui.dialog.DialogAboNoSet;
 import mediathek.tool.FormatterUtil;
 import mediathek.tool.TModel;
 import mediathek.tool.TModelDownload;
-
-import javax.swing.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("serial")
 public class ListeDownloads extends LinkedList<DatenDownload> {
@@ -432,7 +438,9 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
                     abo.arr[DatenAbo.ABO_PSET] = pSet.arr[DatenPset.PROGRAMMSET_NAME];
                 }
                 //dann in die Liste schreiben
-                add(new DatenDownload(pSet, film, DatenDownload.QUELLE_ABO, abo, "", "", "" /*Aufloesung*/));
+                //TODO: Nicklas kontrolle
+                //add(new DatenDownload(pSet, film, DatenDownload.QUELLE_ABO, abo, "", "", "" /*Aufloesung*/));
+                add(new DatenDownload(pSet, film, DatenDownload.QUELLE_ABO, abo, "", "", null /*Aufloesung*/));
                 gefunden = true;
             } else if (parent != null) {
                 // sonst sind wir evtl. nur in einer Konsole ohne X

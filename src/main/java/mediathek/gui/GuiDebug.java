@@ -19,9 +19,22 @@
  */
 package mediathek.gui;
 
+import java.awt.FileDialog;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+
 import com.jidesoft.utils.SystemInfo;
+
 import de.mediathekview.mlib.Const;
-import de.mediathekview.mlib.daten.DatenFilm;
 import de.mediathekview.mlib.daten.ListeFilme;
 import de.mediathekview.mlib.filmlisten.FilmlisteLesen;
 import de.mediathekview.mlib.filmlisten.WriteFilmlistJson;
@@ -33,14 +46,6 @@ import mediathek.config.Daten;
 import mediathek.config.MVConfig;
 import mediathek.gui.dialogEinstellungen.PanelFilmlisten;
 import mediathek.tool.FormatterUtil;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.util.HashSet;
-import java.util.Iterator;
 
 @SuppressWarnings("serial")
 public class GuiDebug extends JPanel {
@@ -72,7 +77,9 @@ public class GuiDebug extends JPanel {
                 -> {
             daten.getListeFilme().clear();
             Duration.staticPing("Start");
-            new FilmlisteLesen().readFilmListe(Daten.getDateiFilmliste(), daten.getListeFilme(), Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ANZ_TAGE_FILMLISTE)));
+            //TODO: Nicklas kontrolle
+            //new FilmlisteLesen().readFilmListe(Daten.getDateiFilmliste(), daten.getListeFilme(), Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ANZ_TAGE_FILMLISTE)));
+            new FilmlisteLesen().readFilmListe(Daten.getDateiFilmliste(), Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ANZ_TAGE_FILMLISTE)));
             Duration.staticPing("Fertig");
             daten.getListeFilme().themenLaden();
             daten.getListeAbo().setAboFuerFilm(daten.getListeFilme(), false /*aboLoeschen*/);
@@ -327,14 +334,17 @@ public class GuiDebug extends JPanel {
     // clean list
     public void cleanList() {
         int count = 0;
-        Log.sysLog("cleanList start: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(System.currentTimeMillis()));
-
+        //TODO: Nicklas kontrolle
+        //Log.sysLog("cleanList start: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(System.currentTimeMillis()));
+        Log.sysLog("cleanList start: " + LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm));
         daten.getListeFilme().forEach(Functions::unescape);
         new WriteFilmlistJson().filmlisteSchreibenJson(Daten.getDateiFilmliste(), daten.getListeFilme());
 
         Listener.notify(Listener.EREIGNIS_BLACKLIST_GEAENDERT, GuiDebug.class.getSimpleName());
 
-        Log.sysLog("cleanList stop: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(System.currentTimeMillis()));
+        //TODO: Nicklas kontrolle
+        //Log.sysLog("cleanList stop: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(System.currentTimeMillis()));
+        Log.sysLog("cleanList stop: " + LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm));
         Log.sysLog("cleanList count: " + count);
     }
 

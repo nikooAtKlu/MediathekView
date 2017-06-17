@@ -19,7 +19,22 @@
  */
 package mediathek.update;
 
-import de.mediathekview.mlib.Const;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Optional;
+
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
+
 import de.mediathekview.mlib.tool.Functions;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.config.Daten;
@@ -27,20 +42,6 @@ import mediathek.config.ErrorCodes;
 import mediathek.config.Konstanten;
 import mediathek.config.MVConfig;
 import mediathek.tool.FormatterUtil;
-
-import javax.swing.*;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Optional;
 
 public class ProgrammUpdateSuchen {
     private static final String UPDATE_SEARCH_TITLE = "Software-Aktualisierung";
@@ -71,7 +72,7 @@ public class ProgrammUpdateSuchen {
                     JOptionPane.showMessageDialog(null, UPDATE_ERROR_MESSAGE, UPDATE_SEARCH_TITLE, JOptionPane.ERROR_MESSAGE);
                 else {
                     MVConfig.add(MVConfig.Configs.SYSTEM_BUILD_NR, Functions.getProgVersion().toString());
-                    MVConfig.add(MVConfig.Configs.SYSTEM_UPDATE_DATUM, FormatterUtil.FORMATTER_yyyyMMdd.format(new Date()));
+                    MVConfig.add(MVConfig.Configs.SYSTEM_UPDATE_DATUM, LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm));
 
                     if (progInfo.getVersion().compare(Functions.getProgVersion()) == 1) {
                         neueVersion = true;

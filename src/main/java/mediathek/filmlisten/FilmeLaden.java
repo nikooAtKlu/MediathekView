@@ -19,11 +19,25 @@
  */
 package mediathek.filmlisten;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.EventListenerList;
+
 import com.jidesoft.utils.SystemInfo;
+
 import de.mediathekview.mlib.Config;
 import de.mediathekview.mlib.Const;
-import de.mediathekview.mlib.daten.DatenFilm;
 import de.mediathekview.mlib.daten.ListeFilme;
+import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLaden;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLadenEvent;
 import de.mediathekview.mlib.filmlisten.FilmlisteLesen;
@@ -40,17 +54,6 @@ import mediathek.gui.dialogEinstellungen.PanelFilmlisteLaden;
 import mediathek.tool.FormatterUtil;
 import mediathek.tool.GuiFunktionen;
 import mediathek.tool.MVMessageDialog;
-
-import javax.swing.*;
-import javax.swing.event.EventListenerList;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.stream.Collectors;
 
 public class FilmeLaden {
 
@@ -109,7 +112,8 @@ public class FilmeLaden {
         SysMsg.sysMsg("");
         SysMsg.sysMsg("Alte Liste erstellt am: " + Daten.getInstance().getListeFilme().genDate());
         SysMsg.sysMsg("  Anzahl Filme: " + daten.getListeFilme().size());
-        SysMsg.sysMsg("  Anzahl Neue: " + daten.getListeFilme().countNewFilms());
+        //TODO: Nicklas Ersatz für die Anzahl der neuen Filme implementieren
+        //SysMsg.sysMsg("  Anzahl Neue: " + daten.getListeFilme().countNewFilms());
         if (!istAmLaufen) {
             // nicht doppelt starten
             istAmLaufen = true;
@@ -141,7 +145,8 @@ public class FilmeLaden {
         SysMsg.sysMsg("");
         SysMsg.sysMsg("Alte Liste erstellt am: " + daten.getListeFilme().genDate());
         SysMsg.sysMsg("  Anzahl Filme: " + daten.getListeFilme().size());
-        SysMsg.sysMsg("  Anzahl Neue: " + daten.getListeFilme().countNewFilms());
+        //TODO: Nicklas Ersatz für die Anzahl der neuen Filme implementieren
+        //SysMsg.sysMsg("  Anzahl Neue: " + daten.getListeFilme().countNewFilms());
         if (!istAmLaufen) {
             // nicht doppelt starten
             istAmLaufen = true;
@@ -194,7 +199,9 @@ public class FilmeLaden {
 
         // wenn nur ein Update
         if (!diffListe.isEmpty()) {
-            SysMsg.sysMsg("Liste Diff gelesen am: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(new Date()));
+        	//TODO: Nicklas kontrolle
+            //SysMsg.sysMsg("Liste Diff gelesen am: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(new Date()));
+        	SysMsg.sysMsg("Liste Diff gelesen am: " + LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm));
             SysMsg.sysMsg("  Liste Diff erstellt am: " + diffListe.genDate());
             SysMsg.sysMsg("  Anzahl Filme: " + diffListe.size());
 
@@ -203,7 +210,9 @@ public class FilmeLaden {
             daten.getListeFilme().sort(); // jetzt sollte alles passen
             diffListe.clear();
         } else {
-            SysMsg.sysMsg("Liste Kompl. gelesen am: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(new Date()));
+        	//TODO: Nicklas kontrolle
+            //SysMsg.sysMsg("Liste Kompl. gelesen am: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(new Date()));
+        	SysMsg.sysMsg("Liste Kompl. gelesen am: " + LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm));
             SysMsg.sysMsg("  Liste Kompl erstellt am: " + daten.getListeFilme().genDate());
             SysMsg.sysMsg("  Anzahl Filme: " + daten.getListeFilme().size());
         }
@@ -218,7 +227,9 @@ public class FilmeLaden {
             // dann die alte Liste wieder laden
             daten.getListeFilme().clear();
             Config.setStop(false);
-            new FilmlisteLesen().readFilmListe(Daten.getDateiFilmliste(), daten.getListeFilme(), Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ANZ_TAGE_FILMLISTE)));
+            //TODO: Nicklas kontrolle
+            //new FilmlisteLesen().readFilmListe(Daten.getDateiFilmliste(), daten.getListeFilme(), Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ANZ_TAGE_FILMLISTE)));
+            new FilmlisteLesen().readFilmListe(Daten.getDateiFilmliste(), Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ANZ_TAGE_FILMLISTE)));
             SysMsg.sysMsg("");
         } else {
             try {
@@ -235,7 +246,8 @@ public class FilmeLaden {
         SysMsg.sysMsg("");
         SysMsg.sysMsg("Jetzige Liste erstellt am: " + daten.getListeFilme().genDate());
         SysMsg.sysMsg("  Anzahl Filme: " + daten.getListeFilme().size());
-        SysMsg.sysMsg("  Anzahl Neue:  " + daten.getListeFilme().countNewFilms());
+        //TODO: Nicklas Ersatz für die Anzahl der neuen Filme implementieren
+        //SysMsg.sysMsg("  Anzahl Neue:  " + daten.getListeFilme().countNewFilms());
         SysMsg.sysMsg("");
 
         daten.getFilmeLaden().notifyProgress(new ListenerFilmeLadenEvent("", "Themen suchen", 0, 0, 0, false/*Fehler*/));
@@ -252,7 +264,9 @@ public class FilmeLaden {
 
 
     private void fillHash(ListeFilme listeFilme) {
-        hashSet.addAll(listeFilme.stream().map(DatenFilm::getUrlHistory).collect(Collectors.toList()));
+    	//TODO: Nicklas kontrolle
+    	//hashSet.addAll(listeFilme.stream().map(DatenFilm::getUrlHistory).collect(Collectors.toList()));
+        hashSet.addAll(listeFilme.stream().map(f -> f.getUrl(Qualities.NORMAL).toString()).collect(Collectors.toList()));
     }
 
     /**

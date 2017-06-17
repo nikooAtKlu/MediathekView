@@ -19,7 +19,8 @@
  */
 package mediathek.gui.dialogEinstellungen;
 
-import de.mediathekview.mlib.daten.DatenFilm;
+import javax.swing.JFrame;
+
 import de.mediathekview.mlib.tool.Listener;
 import mediathek.config.Daten;
 import mediathek.config.Icons;
@@ -27,8 +28,6 @@ import mediathek.config.MVConfig;
 import mediathek.file.GetFile;
 import mediathek.gui.PanelVorlage;
 import mediathek.gui.dialog.DialogHilfe;
-
-import javax.swing.*;
 
 @SuppressWarnings("serial")
 public class PanelEinstellungenGeo extends PanelVorlage {

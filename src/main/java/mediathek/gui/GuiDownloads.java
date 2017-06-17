@@ -19,11 +19,45 @@
  */
 package mediathek.gui;
 
+import java.awt.BorderLayout;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.TimerTask;
+
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.InputMap;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JSplitPane;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+
 import com.jidesoft.utils.SystemInfo;
-import de.mediathekview.mlib.daten.DatenFilm;
+
+import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLaden;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLadenEvent;
-import de.mediathekview.mlib.tool.*;
+import de.mediathekview.mlib.tool.Datum;
+import de.mediathekview.mlib.tool.DbgMsg;
+import de.mediathekview.mlib.tool.Listener;
+import de.mediathekview.mlib.tool.Log;
+import de.mediathekview.mlib.tool.SysMsg;
 import mediathek.MediathekGui;
 import mediathek.config.Daten;
 import mediathek.config.Icons;
@@ -38,16 +72,17 @@ import mediathek.gui.dialog.DialogBeendenZeit;
 import mediathek.gui.dialog.DialogEditAbo;
 import mediathek.gui.dialog.DialogEditDownload;
 import mediathek.gui.filmInformation.IFilmInformation;
-import mediathek.tool.*;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.TimerTask;
+import mediathek.tool.BeobTableHeader;
+import mediathek.tool.CellRendererDownloads;
+import mediathek.tool.DirOpenAction;
+import mediathek.tool.FormatterUtil;
+import mediathek.tool.GuiFunktionen;
+import mediathek.tool.HinweisKeineAuswahl;
+import mediathek.tool.MVFilmSize;
+import mediathek.tool.MVMessageDialog;
+import mediathek.tool.MVTable;
+import mediathek.tool.OpenPlayerAction;
+import mediathek.tool.TModelDownload;
 
 @SuppressWarnings("serial")
 public class GuiDownloads extends PanelVorlage {
@@ -742,7 +777,9 @@ public class GuiDownloads extends PanelVorlage {
                 return;
             }
 
-            String zeit = FormatterUtil.FORMATTER_ddMMyyyy.format(new Date());
+            //TODO: Nicklas kontrolle
+            //String zeit = FormatterUtil.FORMATTER_ddMMyyyy.format(new Date());
+            String zeit = LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm);
 
             ArrayList<DatenDownload> arrayDownloadsLoeschen = new ArrayList<>();
             LinkedList<MVUsedUrl> urlAboList = new LinkedList<>();
@@ -983,7 +1020,7 @@ public class GuiDownloads extends PanelVorlage {
 
     private void updateFilmData() {
         if (isShowing()) {
-            DatenFilm aktFilm = null;
+            Film aktFilm = null;
             final int selectedTableRow = tabelle.getSelectedRow();
             if (selectedTableRow >= 0) {
                 final DatenDownload datenDownload = (DatenDownload) tabelle.getModel().getValueAt(tabelle.convertRowIndexToModel(selectedTableRow), DatenDownload.DOWNLOAD_REF);
@@ -995,8 +1032,8 @@ public class GuiDownloads extends PanelVorlage {
         }
     }
 
-    private ArrayList<DatenFilm> getSelFilme() {
-        ArrayList<DatenFilm> arrayFilme = new ArrayList<>();
+    private ArrayList<Film> getSelFilme() {
+        ArrayList<Film> arrayFilme = new ArrayList<>();
         int rows[] = tabelle.getSelectedRows();
         if (rows.length > 0) {
             for (int row : rows) {

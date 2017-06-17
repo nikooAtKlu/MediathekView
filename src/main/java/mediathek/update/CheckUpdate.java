@@ -19,6 +19,13 @@
  */
 package mediathek.update;
 
+import static java.lang.Thread.sleep;
+
+import java.time.LocalDateTime;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
 import de.mediathekview.mlib.tool.Functions;
 import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
@@ -31,11 +38,6 @@ import mediathek.daten.ListePsetVorlagen;
 import mediathek.gui.dialog.DialogNewSet;
 import mediathek.tool.FormatterUtil;
 import mediathek.tool.GuiFunktionenProgramme;
-
-import javax.swing.*;
-import java.util.Date;
-
-import static java.lang.Thread.sleep;
 
 public class CheckUpdate {
 
@@ -60,7 +62,7 @@ public class CheckUpdate {
             }
 
             if (MVConfig.get(MVConfig.Configs.SYSTEM_BUILD_NR).equals(Functions.getProgVersion().toString())
-                    && MVConfig.get(MVConfig.Configs.SYSTEM_UPDATE_DATUM).equals(FormatterUtil.FORMATTER_yyyyMMdd.format(new Date()))) {
+                    && MVConfig.get(MVConfig.Configs.SYSTEM_UPDATE_DATUM).equals(LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm))) {
                 // keine neue Version und heute schon gemacht
                 return;
             }
@@ -152,7 +154,7 @@ public class CheckUpdate {
                             psNew.arr[DatenPset.PROGRAMMSET_IST_SPEICHERN] = Boolean.FALSE.toString();
                         }
                         // damit man sie auch findet :)
-                        String date = FormatterUtil.FORMATTER_ddMMyyyy.format(new Date());
+                        String date = LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm);
                         listePsetStandard.forEach((psNew) -> psNew.arr[DatenPset.PROGRAMMSET_NAME] = psNew.arr[DatenPset.PROGRAMMSET_NAME] + ", neu: " + date);
                     }
                     GuiFunktionenProgramme.addSetVorlagen(daten.getMediathekGui(), daten, listePsetStandard, true /*auto*/, true /*setVersion*/); // damit auch AddOns geladen werden
