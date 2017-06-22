@@ -64,9 +64,11 @@ import mediathek.config.Icons;
 import mediathek.config.MVConfig;
 import mediathek.controller.MVUsedUrl;
 import mediathek.controller.starter.Start;
+import mediathek.daten.ColumnManagerFactory;
 import mediathek.daten.DatenAbo;
 import mediathek.daten.DatenDownload;
 import mediathek.daten.DatenPset;
+import mediathek.daten.DownloadColumns;
 import mediathek.gui.bandwidth.MVBandwidthMonitorLWin;
 import mediathek.gui.dialog.DialogBeendenZeit;
 import mediathek.gui.dialog.DialogEditAbo;
@@ -342,9 +344,8 @@ public class GuiDownloads extends PanelVorlage {
         });
 
         tabelle.lineBreak = MVConfig.getBool(MVConfig.Configs.SYSTEM_TAB_DOWNLOAD_LINEBREAK);
-        tabelle.getTableHeader().addMouseListener(new BeobTableHeader(tabelle, DatenDownload.COLUMN_NAMES, DatenDownload.spaltenAnzeigen,
-                new int[]{DatenDownload.DOWNLOAD_BUTTON_START, DatenDownload.DOWNLOAD_BUTTON_DEL, DatenDownload.DOWNLOAD_REF},
-                new int[]{DatenDownload.DOWNLOAD_BUTTON_START, DatenDownload.DOWNLOAD_BUTTON_DEL},
+        tabelle.getTableHeader().addMouseListener(new BeobTableHeader(tabelle, ColumnManagerFactory.getInstance().getDownloadColumns(),
+        Arrays.asList(new Column[]{DownloadColumns.BUTTON_START, DownloadColumns.BUTTON_DEL, DownloadColumns.REF}),
                 true /*Icon*/, MVConfig.Configs.SYSTEM_TAB_DOWNLOAD_LINEBREAK));
 
         btnClear.setIcon(Icons.ICON_BUTTON_CLEAR);

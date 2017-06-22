@@ -3,14 +3,21 @@ package mediathek.daten;
 /**
  * Created by nicklas on 06.06.17.
  */
-public enum FilmCoulumns implements Column
+public enum AboColumns implements Column
 {
     NR(0,"Nr"),
-    SENDER(1,"Sender"),
-    THEMA(2,"Thema"), TITEL(3,"Titel"),
-            FILM_ABSPIELEN(4,""), FILM_AUFZEICHNEN(5,""), DATUM(6,"Datum"), ZEIT(7,"Zeit"), DAUER(8,"Dauer"), GROESSE(9,"Größe [MB]")
-    , HD(10,"HD"), UT(11,"UT"),
-            BESCHREIBUNG(12,"Beschreibung"), GEO(13,"Geo"), URL(14,"Url"), ABO(15,"Abo");
+    (1,"aktiv"),
+    NAME(2,"Name"),
+    SENDER(3,"Sender"),
+    THEMA(4,"Thema"), 
+    TITEL(5,"Titel"),
+    THEMA_TITEL(6,"Thema-Titel"), 
+    IRGENDWO(7,"Irgendwo"), 
+    DAUER(8,"Dauer"), 
+    MIN_MAX(9,"min/max"), 
+    ZIELPFAD(10,"Zielpfad"), 
+    LETZTES_ABO(11,"letztes Abo"),
+    PROGRAMMSET(12,"Programmset");
 
     private int id;
     private String name;

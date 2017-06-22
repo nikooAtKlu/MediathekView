@@ -113,13 +113,6 @@ public final class DatenDownload extends MVData<DatenDownload> {
     //
     public static final String TAG = "Downlad";
     public static final int MAX_ELEM = 40;
-    public static final String[] COLUMN_NAMES = {"Nr", "Filmnr", "Abo", "Sender", "Thema", "Titel", "", "",
-        "Fortschritt", "Restzeit", "Geschwindigkeit", "Größe [MB]",
-        "Datum", "Zeit", "Dauer", "HD", "UT",
-        "Pause", "Geo", "Url Film", "Url History", "Url", "Url RTMP", "Url Untertitel",
-        "Programmset", "Programm", "Programmaufruf", "Programmaufruf Array", "Restart",
-        "Dateiname", "Pfad", "Pfad-Dateiname", "Art", "Quelle",
-        "Zurückgestellt", "Infodatei", "Spotlight", "Untertitel", "Remote Download", "Ref"};
     public static final String[] XML_NAMES = {"Nr", "Filmnr", "Abo", "Sender", "Thema", "Titel", "Button-Start", "Button-Del",
         "Fortschritt", "Restzeit", "Geschwindigkeit", "Groesse"/*DOWNLOAD_GROESSE*/,
         "Datum", "Zeit", "Dauer", "HD", "UT",
@@ -127,7 +120,6 @@ public final class DatenDownload extends MVData<DatenDownload> {
         "Programmset", "Programm", "Programmaufruf_", "Programmaufruf", "Restart",
         "Dateiname", "Pfad", "Pfad-Dateiname", "Art", "Quelle",
         "Zurueckgestellt", "Infodatei", "Spotlight", "Untertitel", "Remote-Download", "Ref"};
-    public static boolean[] spaltenAnzeigen = new boolean[MAX_ELEM];
 
     public Datum datumFilm = new Datum(0);
     public Film film = null;

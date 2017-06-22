@@ -37,9 +37,6 @@ public class DatenAbo extends MVData<DatenAbo> {
     public static final int ABO_ZIELPFAD = 10;
     public static final int ABO_DOWN_DATUM = 11;
     public static final int ABO_PSET = 12;
-    public static final String[] COLUMN_NAMES = {"Nr", "aktiv", "Name",
-        "Sender", "Thema", "Titel", "Thema-Titel",
-        "Irgendwo", "Dauer", "min/max", "Zielpfad", "letztes Abo", "Programmset"};
     public static final String[] XML_NAMES = {"Nr", "aktiv", "Name",
         "Sender", "Thema", "Titel", "Thema-Titel",
         "Irgendwo", "Mindestdauer", "min_max", "Zielpfad", "letztes_Abo", "Programmset"};

@@ -83,6 +83,7 @@ import mediathek.config.Daten;
 import mediathek.config.Icons;
 import mediathek.config.MVConfig;
 import mediathek.controller.starter.Start;
+import mediathek.daten.ColumnManagerFactory;
 import mediathek.daten.DatenAbo;
 import mediathek.daten.DatenBlacklist;
 import mediathek.daten.DatenDownload;
@@ -382,7 +383,7 @@ public class GuiFilme extends PanelVorlage {
         tabelle.setDefaultRenderer(Datum.class, cellRenderer);
         tabelle.setDefaultRenderer(Integer.class, cellRenderer);
         tabelle.lineBreak = MVConfig.getBool(MVConfig.Configs.SYSTEM_TAB_FILME_LINEBREAK);
-        tabelle.getTableHeader().addMouseListener(new BeobTableHeader(tabelle, Arrays.asList(FilmCoulumns.values()),
+        tabelle.getTableHeader().addMouseListener(new BeobTableHeader(tabelle, ColumnManagerFactory.getInstance().getFilmColumns(),
                 Arrays.asList(FilmCoulumns.FILM_ABSPIELEN, FilmCoulumns.FILM_AUFZEICHNEN),
                 true /*Icon*/, MVConfig.Configs.SYSTEM_TAB_FILME_LINEBREAK));
 

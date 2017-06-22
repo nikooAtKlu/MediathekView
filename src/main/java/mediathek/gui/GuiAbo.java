@@ -25,16 +25,21 @@ import mediathek.MediathekGui;
 import mediathek.config.Daten;
 import mediathek.config.Icons;
 import mediathek.config.MVConfig;
+import mediathek.daten.AboColumns;
+import mediathek.daten.Column;
+import mediathek.daten.ColumnManagerFactory;
 import mediathek.daten.DatenAbo;
 import mediathek.gui.dialog.DialogEditAbo;
 import mediathek.tool.*;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 
 @SuppressWarnings("serial")
 public class GuiAbo extends PanelVorlage {
@@ -112,9 +117,8 @@ public class GuiAbo extends PanelVorlage {
         tabelle.setDefaultRenderer(Integer.class, new CellRendererAbo());
         tabelle.setModel(new TModelAbo(new Object[][]{}, DatenAbo.COLUMN_NAMES));
         tabelle.lineBreak = MVConfig.getBool(MVConfig.Configs.SYSTEM_TAB_ABO_LINEBREAK);
-        tabelle.getTableHeader().addMouseListener(new BeobTableHeader(tabelle, DatenAbo.COLUMN_NAMES, DatenAbo.spaltenAnzeigen,
-                new int[]{DatenAbo.ABO_EINGESCHALTET},
-                new int[]{},
+        tabelle.getTableHeader().addMouseListener(new BeobTableHeader(tabelle, ColumnManagerFactory.getInstance().getAboColumns(),
+                Arrays.asList(new Column[]{AboColumns.AKTIV}),
                 true /*Icon*/, MVConfig.Configs.SYSTEM_TAB_ABO_LINEBREAK));
         this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_T, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()), "tabelle");
         this.getActionMap().put("tabelle", new AbstractAction() {

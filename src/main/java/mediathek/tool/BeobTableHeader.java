@@ -20,9 +20,10 @@
 package mediathek.tool;
 
 import mediathek.config.MVConfig;
-import mediathek.daten.FilmCoulumns;
+import mediathek.daten.Column;
 
 import javax.swing.*;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -32,13 +33,13 @@ public class BeobTableHeader extends MouseAdapter
     //rechhte Maustaste in der Tabelle
 
     private MVTable tabelle;
-    private LinkedHashMap<FilmCoulumns, Boolean> columns;
-    private LinkedHashMap<FilmCoulumns, JButton> buttons;
-    private LinkedHashMap<FilmCoulumns,JCheckBoxMenuItem> box;
+    private LinkedHashMap<Column, Boolean> columns;
+    private LinkedHashMap<Column, JButton> buttons;
+    private LinkedHashMap<Column,JCheckBoxMenuItem> box;
     private boolean icon = false;
     MVConfig.Configs configs;
 
-    public BeobTableHeader(MVTable tabelle, Collection<FilmCoulumns> aColumns, Collection<FilmCoulumns> aColumnsNotToShow, boolean icon, MVConfig.Configs configs)
+    public BeobTableHeader(MVTable tabelle, Collection<Column> aColumns, Collection<Column> aColumnsNotToShow, boolean icon, MVConfig.Configs configs)
     {
         this.tabelle = tabelle;
         this.icon = icon;
@@ -47,9 +48,9 @@ public class BeobTableHeader extends MouseAdapter
         box = new LinkedHashMap<>();
         buttons = new LinkedHashMap<>();
         columns = new LinkedHashMap<>();
-        for (FilmCoulumns filmCoulumn : aColumns)
+        for (Column column : aColumns)
         {
-            columns.put(filmCoulumn, aColumnsNotToShow == null || aColumnsNotToShow.isEmpty() || !aColumnsNotToShow.contains(filmCoulumn));
+            columns.put(column, aColumnsNotToShow == null || aColumnsNotToShow.isEmpty() || !aColumnsNotToShow.contains(column));
         }
     }
 
@@ -76,15 +77,15 @@ public class BeobTableHeader extends MouseAdapter
     {
         JPopupMenu jPopupMenu = new JPopupMenu();
         // Spalten ein-ausschalten
-        for (FilmCoulumns filmCoulumn : columns.keySet())
+        for (Column coulumn : columns.keySet())
         {
-            if (!columns.get(filmCoulumn))
+            if (!columns.get(coulumn))
             {
                 continue;
             }
-            final JCheckBoxMenuItem neueCheckbox = new JCheckBoxMenuItem(filmCoulumn.getName());
-            box.put(filmCoulumn,neueCheckbox);
-            neueCheckbox.setSelected(columns.get(filmCoulumn));
+            final JCheckBoxMenuItem neueCheckbox = new JCheckBoxMenuItem(coulumn.getName());
+            box.put(coulumn,neueCheckbox);
+            neueCheckbox.setSelected(columns.get(coulumn));
             neueCheckbox.addActionListener(e -> setSpalten());
             jPopupMenu.add(neueCheckbox);
         }
@@ -158,7 +159,7 @@ public class BeobTableHeader extends MouseAdapter
 
     private void setSpalten()
     {
-        for (FilmCoulumns boxKey : box.keySet())
+        for (Column boxKey : box.keySet())
         {
                 columns.replace(boxKey,box.get(boxKey).isSelected());
         }
