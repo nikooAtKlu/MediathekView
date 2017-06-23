@@ -6,7 +6,7 @@ package mediathek.daten;
 public enum AboColumns implements Column
 {
     NR(0,"Nr"),
-    (1,"aktiv"),
+    AKTIV(1,"aktiv"),
     NAME(2,"Name"),
     SENDER(3,"Sender"),
     THEMA(4,"Thema"), 
@@ -22,7 +22,7 @@ public enum AboColumns implements Column
     private int id;
     private String name;
 
-    FilmCoulumns(int aId, String aName)
+    AboColumns(int aId, String aName)
     {
         id=aId;
         name=aName;

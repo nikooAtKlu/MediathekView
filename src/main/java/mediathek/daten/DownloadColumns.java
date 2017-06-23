@@ -9,7 +9,7 @@ public enum DownloadColumns implements Column
     
     NR(0,"Nr"),
     FILMNR(1,"Filmnr"),
-    ABO(2,"Abo")
+    ABO(2,"Abo"),
     SENDER(3,"Sender"),
     THEMA(4,"Thema"),
     TITEL(5,"Titel"),
@@ -51,7 +51,7 @@ public enum DownloadColumns implements Column
     private int id;
     private String name;
 
-    FilmCoulumns(int aId, String aName)
+    DownloadColumns(int aId, String aName)
     {
         id=aId;
         name=aName;

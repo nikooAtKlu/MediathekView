@@ -8,10 +8,7 @@ public class ColumnManagerFactory {
     
     public static ColumnManagerFactory getInstance()
     {
-        if(instance == null)
-        {
-            instance = new ColumnManagerFactory(); 
-        }
+        if(instance == null) instance = new ColumnManagerFactory();
         return instance;
     }
     
@@ -23,7 +20,7 @@ public class ColumnManagerFactory {
     
     public Collection<Column> getFilmColumns()
     {
-        return Arrays.asList(FilmCoulumns.values());
+        return Arrays.asList(FilmColumns.values());
     }
     
     public Collection<Column> getDownloadColumns()

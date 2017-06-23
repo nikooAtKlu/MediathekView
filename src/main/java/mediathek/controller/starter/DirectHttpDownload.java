@@ -31,6 +31,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import javax.swing.SwingUtilities;
@@ -164,7 +165,7 @@ public class DirectHttpDownload extends Thread {
                 melden = true;
             }
             if (datenDownload.mVFilmSize.getSize() > 0) {
-                p = (aktSize * (long) 1000) / datenDownload.mVFilmSize.getSize();
+                p = (aktSize * 1000) / datenDownload.mVFilmSize.getSize();
                 if (startProzent == -1) {
                     startProzent = p;
                 }
@@ -180,7 +181,8 @@ public class DirectHttpDownload extends Thread {
                     // Restzeit ermitteln
                     if (p > 2 && p > startProzent) {
                         // sonst macht es noch keinen Sinn
-                        final int diffZeit = start.startZeit.diffInSekunden();
+                        //final int diffZeit = start.startZeit.diffInSekunden();
+                    	final long diffZeit = Duration.between(start.startZeit,LocalDateTime.now()).getSeconds();
                         final int restProzent = 1000 - (int) p;
                         start.restSekunden = (diffZeit * restProzent / (p - startProzent));
                         // anfangen zum Schauen kann man, wenn die Restzeit kürzer ist

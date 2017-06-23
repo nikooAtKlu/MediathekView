@@ -3,7 +3,7 @@ package mediathek.daten;
 /**
  * Created by nicklas on 06.06.17.
  */
-public enum FilmCoulumns implements Column
+public enum FilmColumns implements Column
 {
     NR(0,"Nr"),
     SENDER(1,"Sender"),
@@ -15,7 +15,7 @@ public enum FilmCoulumns implements Column
     private int id;
     private String name;
 
-    FilmCoulumns(int aId, String aName)
+    FilmColumns(int aId, String aName)
     {
         id=aId;
         name=aName;
