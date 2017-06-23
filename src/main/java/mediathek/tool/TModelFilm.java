@@ -19,7 +19,11 @@
  */
 package mediathek.tool;
 
+import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.tool.Datum;
+import mediathek.daten.ColumnManagerFactory;
+import mediathek.daten.DownloadColumns;
+import mediathek.daten.FilmColumns;
 
 @SuppressWarnings("serial")
 public class TModelFilm extends TModel {
@@ -27,25 +31,52 @@ public class TModelFilm extends TModel {
 
     public TModelFilm(Object[][] data, Object[] columnNames) {
         super(data, columnNames);
-        types = new Class<?>[DatenFilm.MAX_ELEM];
-        for (int i = 0; i < DatenFilm.MAX_ELEM; ++i) {
-            switch (i) {
-                case DatenFilm.FILM_NR:
-                    types[i] = Integer.class;
-                    break;
-                case DatenFilm.FILM_DATUM:
-                    types[i] = Datum.class;
-                    break;
-                case DatenFilm.FILM_GROESSE:
-                    types[i] = MVFilmSize.class;
-                    break;
-                case DatenFilm.FILM_REF:
-                    types[i] = DatenFilm.class;
-                    break;
-                default:
-                    types[i] = String.class;
-            }
-        }
+        //TODO: Nicklas kontrolle
+        types = new Class<?>[FilmColumns.values().length];
+        for (FilmColumns enumi : FilmColumns.values()) {
+        	int i = enumi.getId();
+        	if(i == DownloadColumns.REF.getId()) {
+        		//TODO: Nicklas kontrolle
+        		//types[i] = DatenFilm.class;
+        		types[i] = Film.class;
+        		break;
+        	}
+        	switch (ColumnManagerFactory.getInstance().getFilmColumnById(i)) {
+	            case NR:
+	                types[i] = Integer.class;
+	                break;
+	            case DATUM:
+	                types[i] = Datum.class;
+	                break;
+	            case GROESSE:
+	                types[i] = MVFilmSize.class;
+	                break;
+//	            case DownloadColumns.REF.getId():
+//	                //types[i] = DatenFilm.class;
+//	                break;
+	            default:
+	                types[i] = String.class;
+	        }
+	    }
+	
+//        for (int i = 0; i < DatenFilm.MAX_ELEM; ++i) {
+//            switch (i) {
+//                case FilmColumns.NR.getId():
+//                    types[i] = Integer.class;
+//                    break;
+//                case FilmColumns.DATUM.getId():
+//                    types[i] = Datum.class;
+//                    break;
+//                case FilmColumns.GROESSE.getId():
+//                    types[i] = MVFilmSize.class;
+//                    break;
+//                case DownloadColumns.REF.getId():
+//                    types[i] = DatenFilm.class;
+//                    break;
+//                default:
+//                    types[i] = String.class;
+//            }
+//        }
     }
 
     @Override

@@ -55,9 +55,9 @@ public class ColumnManagerFactory {
      * @param aId The id.
      * @return The Column with the given ID or null when no Column found.
      */
-    public Column getFilmColumnById(int aId)
+    public FilmColumns getFilmColumnById(int aId)
     {
-        return getById(aId,getFilmColumns());
+        return (FilmColumns) getById(aId,getFilmColumns());
     }
     
     /**
@@ -78,5 +78,29 @@ public class ColumnManagerFactory {
     public Column getAboColumnById(int aId)
     {
         return getById(aId,getAboColumns());
+    }
+    
+    public String[] getFilmColumnAllNames() {
+    	String[] names = new String[FilmColumns.values().length];
+    	for(FilmColumns colum : FilmColumns.values()) {
+    		names[colum.getId()] = colum.getName();
+    	}
+		return names;
+    }
+    
+    public String[] getAboColumnAllNames() {
+    	String[] names = new String[AboColumns.values().length];
+    	for(AboColumns colum : AboColumns.values()) {
+    		names[colum.getId()] = colum.getName();
+    	}
+		return names;
+    }
+    
+    public String[] getDownloadColumnAllNames() {
+    	String[] names = new String[DownloadColumns.values().length];
+    	for(DownloadColumns colum : DownloadColumns.values()) {
+    		names[colum.getId()] = colum.getName();
+    	}
+		return names;
     }
 }

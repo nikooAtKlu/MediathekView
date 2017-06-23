@@ -1,8 +1,6 @@
 package mediathek.daten;
 
-/**
- * Created by nicklas on 06.06.17.
- */
+
 public enum DownloadColumns implements Column
 {
     
