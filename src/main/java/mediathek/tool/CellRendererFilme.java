@@ -31,7 +31,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import com.jidesoft.utils.SystemInfo;
 
 import de.mediathekview.mlib.daten.Film;
-import de.mediathekview.mlib.daten.ListeFilme;
+import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.config.Daten;
@@ -41,6 +41,8 @@ import mediathek.config.MVConfig;
 import mediathek.controller.MVUsedUrls;
 import mediathek.controller.starter.Start;
 import mediathek.daten.DatenDownload;
+import mediathek.daten.DownloadColumns;
+import mediathek.daten.FilmColumns;
 
 @SuppressWarnings("serial")
 public class CellRendererFilme extends DefaultTableCellRenderer {
@@ -94,16 +96,17 @@ public class CellRendererFilme extends DefaultTableCellRenderer {
 
             final int rowModelIndex = table.convertRowIndexToModel(row);
             final int columnModelIndex = table.convertColumnIndexToModel(column);
-            Film datenFilm = (Film) table.getModel().getValueAt(rowModelIndex, DatenFilm.FILM_REF);
-            DatenDownload datenDownload = Daten.getInstance().getListeDownloadsButton().getDownloadUrlFilm(datenFilm.arr[DatenFilm.FILM_URL]);
+            Film datenFilm = (Film) table.getModel().getValueAt(rowModelIndex, DownloadColumns.REF.getId());
+            //DatenDownload datenDownload = Daten.getInstance().getListeDownloadsButton().getDownloadUrlFilm(datenFilm.arr[DatenFilm.FILM_URL]);
+            DatenDownload datenDownload = Daten.getInstance().getListeDownloadsButton().getDownloadUrlFilm(datenFilm.getUrl(Qualities.NORMAL));
 
             if (((MVTable) table).lineBreak) {
                 JTextArea textArea;
                 switch (columnModelIndex) {
-                    case DatenFilm.FILM_BESCHREIBUNG:
-                    case DatenFilm.FILM_THEMA:
-                    case DatenFilm.FILM_TITEL:
-                    case DatenFilm.FILM_URL:
+                	case FilmColumns.BESCHREIBUNG.getId():
+                    case FilmColumns.THEMA.getId():
+                    case FilmColumns.TITEL.getId():
+                    case FilmColumns.URL.getId():
                         textArea = new JTextArea();
                         textArea.setLineWrap(true);
                         textArea.setWrapStyleWord(true);
@@ -132,46 +135,46 @@ public class CellRendererFilme extends DefaultTableCellRenderer {
                 }
             }
             switch (columnModelIndex) {
-                case DatenFilm.FILM_NR:
-                case DatenFilm.FILM_DATUM:
-                case DatenFilm.FILM_ZEIT:
-                case DatenFilm.FILM_DAUER:
+                case FilmColumns.NR.getId():
+                case FilmColumns.DATUM.getId():
+                case FilmColumns.ZEIT.getId():
+                case FilmColumns.DAUER.getId():
                     setHorizontalAlignment(SwingConstants.CENTER);
                     break;
-                case DatenFilm.FILM_GROESSE:
+                case FilmColumns.GROESSE.getId():
                     setHorizontalAlignment(SwingConstants.RIGHT);
                     break;
-                case DatenFilm.FILM_ABSPIELEN:
+                case FilmColumns.FILM_ABSPIELEN.getId():
                     handleButtonStartColumn(datenDownload, isSelected);
                     break;
 
-                case DatenFilm.FILM_AUFZEICHNEN:
+                case FilmColumns.FILM_AUFZEICHNEN.getId():
                     handleButtonDownloadColumn(isSelected);
                     break;
-                case DatenFilm.FILM_SENDER:
+                case FilmColumns.SENDER.getId():
                     if (((MVTable) table).iconAnzeigen) {
                         handleSenderColumn((String) value, ((MVTable) table).iconKlein);
                     }
                     break;
                 case DatenFilm.FILM_NEU:
                     setHorizontalAlignment(SwingConstants.CENTER);
-                    if (datenFilm.isNew()) {
+                    if (datenFilm.isNeu()) {
                         setIcon(ja_16);
                     } else {
                         setIcon(nein_12);
                     }
                     setText("");
                     break;
-                case DatenFilm.FILM_HD:
+                case FilmColumns.HD.getId():
                     setHorizontalAlignment(SwingConstants.CENTER);
-                    if (datenFilm.isHD()) {
+                    if (datenFilm.hasHD()) {
                         setIcon(ja_16);
                     } else {
                         setIcon(nein_12);
                     }
                     setText("");//im Modle brauchen wir den Text zum Sortieren
                     break;
-                case DatenFilm.FILM_UT:
+                case FilmColumns.UT.getId():
                     setHorizontalAlignment(SwingConstants.CENTER);
                     if (datenFilm.hasUT()) {
                         setIcon(ja_16);
@@ -188,8 +191,9 @@ public class CellRendererFilme extends DefaultTableCellRenderer {
         return this;
     }
 
-    private void setColor(Component c, DatenFilm datenFilm, DatenDownload datenDownload, boolean isSelected) {
-        boolean live = datenFilm.arr[DatenFilm.FILM_THEMA].equals(ListeFilme.THEMA_LIVE);
+    private void setColor(Component c, Film datenFilm, DatenDownload datenDownload, boolean isSelected) {
+        //boolean live = datenFilm.arr[DatenFilm.FILM_THEMA].equals(ListeFilme.THEMA_LIVE);
+    	boolean live = datenFilm.getThema().equals(de.mediathekview.mlib.Const.THEMA_LIVESTREAM);
         boolean start = false;
 
         if (datenDownload != null) {
@@ -238,13 +242,13 @@ public class CellRendererFilme extends DefaultTableCellRenderer {
                 if (!isSelected) {
                     c.setBackground(MVColor.FILM_HISTORY.color);
                 }
-            } else if (datenFilm.isNew()) {
+            } else if (datenFilm.isNeu()) {
                 c.setForeground(MVColor.FILM_NEU.color);
             }
         }
         if (!start && geoMelden) {
-            if (!datenFilm.arr[DatenFilm.FILM_GEO].isEmpty()) {
-                if (!datenFilm.arr[DatenFilm.FILM_GEO].contains(MVConfig.get(MVConfig.Configs.SYSTEM_GEO_STANDORT))) {
+            if (!datenFilm.getGeoLocations().isEmpty()) {
+                if (!datenFilm.getGeoLocations().contains(MVConfig.get(MVConfig.Configs.SYSTEM_GEO_STANDORT))) {
                     //setForeground(GuiKonstanten.FARBE_FILM_GEOBLOCK_FORGROUND);
                     if (isSelected) {
                         c.setBackground(MVColor.FILM_GEOBLOCK_BACKGROUND_SEL.color);

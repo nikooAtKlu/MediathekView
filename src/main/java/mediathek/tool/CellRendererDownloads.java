@@ -19,7 +19,25 @@
  */
 package mediathek.tool;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicProgressBarUI;
+import javax.swing.table.DefaultTableCellRenderer;
+
 import com.jidesoft.utils.SystemInfo;
+
 import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.config.Icons;
@@ -27,12 +45,6 @@ import mediathek.config.MVColor;
 import mediathek.config.MVConfig;
 import mediathek.controller.starter.Start;
 import mediathek.daten.DatenDownload;
-
-import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.plaf.basic.BasicProgressBarUI;
-import javax.swing.table.DefaultTableCellRenderer;
-import java.awt.*;
 
 @SuppressWarnings("serial")
 public class CellRendererDownloads extends DefaultTableCellRenderer {
@@ -327,7 +339,9 @@ public class CellRendererDownloads extends DefaultTableCellRenderer {
                     break;
                 case DatenDownload.DOWNLOAD_HD:
                     setHorizontalAlignment(SwingConstants.CENTER);
-                    if (datenDownload.film != null && datenDownload.film.isHD()) {
+                    //TODO: Nicklas kontrolle
+                    //if (datenDownload.film != null && datenDownload.film.isHD()) {
+                    if (datenDownload.film != null && datenDownload.film.hasHD()) {
                         setIcon(ja_16);
                     } else {
                         setIcon(nein_12);
