@@ -27,6 +27,8 @@ import org.jdesktop.swingx.JXHyperlink;
 
 import de.mediathekview.mlib.daten.Film;
 import mediathek.config.Icons;
+import mediathek.daten.ColumnManagerFactory;
+import mediathek.daten.FilmColumns;
 import mediathek.gui.actions.UrlHyperlinkAction;
 import mediathek.tool.BeobMausUrl;
 
@@ -43,9 +45,10 @@ public class MVFilmInformationOSX implements IFilmInformation {
     private JLabel jLabelFilmHD;
     private JLabel jLabelFilmUT;
     private JFrame parent = null;
-    private final JLabel[] labelArrNames = new JLabel[DatenFilm.MAX_ELEM];
-    private final JTextField[] txtArrCont = new JTextField[DatenFilm.MAX_ELEM];
-    private Film aktFilm = new Film();
+    private final JLabel[] labelArrNames = new JLabel[FilmColumns.values().length];
+    private final JTextField[] txtArrCont = new JTextField[FilmColumns.values().length];
+    //private Film aktFilm = new Film();
+    private Film aktFilm;
     private static final ImageIcon ja_sw_16 = Icons.ICON_DIALOG_EIN_SW;
 
     private void createDialog(JFrame parent) {
@@ -61,15 +64,16 @@ public class MVFilmInformationOSX implements IFilmInformation {
 
         createDialog(owner);
         final Border emptyBorder = BorderFactory.createEmptyBorder(0, 0, 0, 0);
-        for (int i = 0; i < DatenFilm.MAX_ELEM; ++i) {
-            final JLabel lbl = new JLabel(DatenFilm.COLUMN_NAMES[i] + ':');
+        //for (int i = 0; i < DatenFilm.MAX_ELEM; ++i) {
+        for(FilmColumns colum : FilmColumns.values()) {
+            final JLabel lbl = new JLabel(colum.getName() + ':');
             lbl.setHorizontalAlignment(SwingConstants.RIGHT);
-            labelArrNames[i] = lbl;
+            labelArrNames[colum.getId()] = lbl;
 
             final JTextField tf = new JTextField("");
             tf.setEditable(false);
             tf.setBorder(emptyBorder);
-            txtArrCont[i] = tf;
+            txtArrCont[colum.getId()] = tf;
         }
 
         hudDialog.setContentPane(buildLayout());
@@ -157,28 +161,28 @@ public class MVFilmInformationOSX implements IFilmInformation {
         panel.add(labelArrNames[i]);
         c.gridx = 1;
         c.weightx = 10;
-        switch (i) {
-            case DatenFilm.FILM_WEBSEITE:
+        switch (ColumnManagerFactory.getInstance().getFilmColumnById(i)) {
+            case WEBSEITE:
                 gridbag.setConstraints(lblUrlThemaField, c);
                 panel.add(lblUrlThemaField);
                 break;
-            case DatenFilm.FILM_URL_SUBTITLE:
-                gridbag.setConstraints(lblUrlSubtitle, c);
-                panel.add(lblUrlSubtitle);
-                break;
-            case DatenFilm.FILM_BESCHREIBUNG:
+//            case SUBTITEL:
+//                gridbag.setConstraints(lblUrlSubtitle, c);
+//                panel.add(lblUrlSubtitle);
+//                break;
+            case BESCHREIBUNG:
                 gridbag.setConstraints(textAreaBeschreibung, c);
                 panel.add(textAreaBeschreibung);
                 break;
-            case DatenFilm.FILM_NEU:
+            case NEU:
                 gridbag.setConstraints(jLabelFilmNeu, c);
                 panel.add(jLabelFilmNeu);
                 break;
-            case DatenFilm.FILM_HD:
+            case HD:
                 gridbag.setConstraints(jLabelFilmHD, c);
                 panel.add(jLabelFilmHD);
                 break;
-            case DatenFilm.FILM_UT:
+            case UT:
                 gridbag.setConstraints(jLabelFilmUT, c);
                 panel.add(jLabelFilmUT);
                 break;
@@ -233,16 +237,16 @@ public class MVFilmInformationOSX implements IFilmInformation {
             for (int i = 0; i < txtArrCont.length; ++i) {
                 txtArrCont[i].setText(aktFilm.arr[i]);
             }
-            if (aktFilm.arr[DatenFilm.FILM_BESCHREIBUNG].isEmpty()) {
+            if (aktFilm.getBeschreibung().isEmpty()) {
                 // sonst müsste die Größe gesetzt werden
                 textAreaBeschreibung.setText(" ");
             } else {
-                textAreaBeschreibung.setText(aktFilm.arr[DatenFilm.FILM_BESCHREIBUNG]);
+                textAreaBeschreibung.setText(aktFilm.getBeschreibung());
             }
-            lblUrlThemaField.setText(aktFilm.arr[DatenFilm.FILM_WEBSEITE]);
+            lblUrlThemaField.setText(aktFilm.getWebsite().toString());
             lblUrlSubtitle.setText(aktFilm.getUrlSubtitle());
-            jLabelFilmNeu.setVisible(aktFilm.isNew());
-            jLabelFilmHD.setVisible(aktFilm.isHD());
+            jLabelFilmNeu.setVisible(aktFilm.isNeu());
+            jLabelFilmHD.setVisible(aktFilm.hasHD());
             jLabelFilmUT.setVisible(aktFilm.hasUT());
         }
         hudDialog.repaint();
