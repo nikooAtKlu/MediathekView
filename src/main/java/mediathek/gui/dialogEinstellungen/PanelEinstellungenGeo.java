@@ -21,6 +21,7 @@ package mediathek.gui.dialogEinstellungen;
 
 import javax.swing.JFrame;
 
+import de.mediathekview.mlib.daten.GeoLocations;
 import de.mediathekview.mlib.tool.Listener;
 import mediathek.config.Daten;
 import mediathek.config.Icons;
@@ -39,40 +40,40 @@ public class PanelEinstellungenGeo extends PanelVorlage {
     }
 
     private void init() {
-        switch (MVConfig.get(MVConfig.Configs.SYSTEM_GEO_STANDORT)) {
-            case DatenFilm.GEO_CH:
+        switch (GeoLocations.valueOf(MVConfig.get(MVConfig.Configs.SYSTEM_GEO_STANDORT))) {
+            case GEO_CH:
                 jRadioButtonCH.setSelected(true);
                 break;
-            case DatenFilm.GEO_AT:
+            case GEO_AT:
                 jRadioButtonAt.setSelected(true);
                 break;
-            case DatenFilm.GEO_EU:
+            case GEO_EU:
                 jRadioButtonEu.setSelected(true);
                 break;
-            case DatenFilm.GEO_WELT:
+            case GEO_WELT:
                 jRadioButtonSonst.setSelected(true);
                 break;
             default:
                 jRadioButtonDe.setSelected(true);
         }
         jRadioButtonDe.addActionListener(e -> {
-            MVConfig.add(MVConfig.Configs.SYSTEM_GEO_STANDORT, DatenFilm.GEO_DE);
+            MVConfig.add(MVConfig.Configs.SYSTEM_GEO_STANDORT, GeoLocations.GEO_DE.name());
             melden();
         });
         jRadioButtonCH.addActionListener(e -> {
-            MVConfig.add(MVConfig.Configs.SYSTEM_GEO_STANDORT, DatenFilm.GEO_CH);
+            MVConfig.add(MVConfig.Configs.SYSTEM_GEO_STANDORT, GeoLocations.GEO_CH.name());
             melden();
         });
         jRadioButtonAt.addActionListener(e -> {
-            MVConfig.add(MVConfig.Configs.SYSTEM_GEO_STANDORT, DatenFilm.GEO_AT);
+            MVConfig.add(MVConfig.Configs.SYSTEM_GEO_STANDORT, GeoLocations.GEO_AT.name());
             melden();
         });
         jRadioButtonEu.addActionListener(e -> {
-            MVConfig.add(MVConfig.Configs.SYSTEM_GEO_STANDORT, DatenFilm.GEO_EU);
+            MVConfig.add(MVConfig.Configs.SYSTEM_GEO_STANDORT, GeoLocations.GEO_EU.name());
             melden();
         });
         jRadioButtonSonst.addActionListener(e -> {
-            MVConfig.add(MVConfig.Configs.SYSTEM_GEO_STANDORT, DatenFilm.GEO_WELT);
+            MVConfig.add(MVConfig.Configs.SYSTEM_GEO_STANDORT, GeoLocations.GEO_WELT.name());
             melden();
         });
         jCheckBoxMarkieren.setSelected(Boolean.parseBoolean(MVConfig.get(MVConfig.Configs.SYSTEM_GEO_MELDEN)));

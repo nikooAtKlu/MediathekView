@@ -49,9 +49,10 @@ public class DialogFilmBeschreibung extends JDialog {
                 beenden();
             }
         };
-        jTextArea1.setText(datenFilm.arr[DatenFilm.FILM_BESCHREIBUNG]);
-        jTextFieldTitel.setText(datenFilm.arr[DatenFilm.FILM_TITEL]);
+        jTextArea1.setText(datenFilm.getBeschreibung());
+        jTextFieldTitel.setText(datenFilm.getTitel());
         jButtonOk.addActionListener(e -> {
+        	//TODO: Nicklas keine ahnung?!
             datenFilm.arr[DatenFilm.FILM_BESCHREIBUNG] = jTextArea1.getText();
             dispose();
         });
@@ -64,6 +65,7 @@ public class DialogFilmBeschreibung extends JDialog {
                 + "Achtung: Diese Änderungen gehen nach dem Neuladen\n"
                 + "einer Filmliste verloren.").setVisible(true));
         jButtonSpeichern.addActionListener(e -> {
+        	//TODO: Nicklas hier auch keine ahnung?!
             datenFilm.arr[DatenFilm.FILM_BESCHREIBUNG] = jTextArea1.getText();
             MVInfoFile.writeInfoFile(paFrame, daten, datenFilm);
         });
