@@ -19,6 +19,10 @@
  */
 package mediathek.filmlisten;
 
+import java.util.ArrayList;
+
+import javax.swing.event.EventListenerList;
+
 import de.mediathekview.mlib.Config;
 import de.mediathekview.mlib.daten.ListeFilme;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLaden;
@@ -26,9 +30,6 @@ import de.mediathekview.mlib.filmesuchen.ListenerFilmeLadenEvent;
 import de.mediathekview.mlib.filmlisten.FilmlisteLesen;
 import de.mediathekview.mlib.filmlisten.FilmlistenSuchen;
 import de.mediathekview.mlib.tool.Log;
-
-import javax.swing.event.EventListenerList;
-import java.util.ArrayList;
 
 public class ImportFilmliste {
 
@@ -204,7 +205,8 @@ public class ImportFilmliste {
         try {
             if (!dateiUrl.isEmpty()) {
                 Log.sysLog("Filmliste laden von: " + dateiUrl);
-                msFilmlisteLesen.readFilmListe(dateiUrl, listeFilme, days);
+                //msFilmlisteLesen.readFilmListe(dateiUrl, listeFilme, days);
+                listeFilme.addAll(msFilmlisteLesen.readFilmListe(dateiUrl, days));
                 if (!listeFilme.isEmpty()) {
                     ret = true;
                 }

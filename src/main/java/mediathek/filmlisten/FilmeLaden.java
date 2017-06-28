@@ -35,7 +35,6 @@ import javax.swing.event.EventListenerList;
 import com.jidesoft.utils.SystemInfo;
 
 import de.mediathekview.mlib.Config;
-import de.mediathekview.mlib.Const;
 import de.mediathekview.mlib.daten.ListeFilme;
 import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLaden;
@@ -171,9 +170,10 @@ public class FilmeLaden {
         Config.setStop(set);
     }
 
-    public String[] getSenderNamen() {
-        return Const.SENDER;
-    }
+    //TODO: Nicklas kontrolle -> fliegt raus weil alle aufrufe ersetzt wurden durch Sender.values()
+//    public Sender[] getSenderNamen() {
+//        return Sender.values();
+//    }
 
     public void updateDownloadUrlsFilmlisten(boolean akt) {
         importFilmliste.updateDownloadUrlsFilmlisten(akt);

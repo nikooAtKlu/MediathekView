@@ -19,6 +19,27 @@
  */
 package mediathek.gui;
 
+import java.awt.BorderLayout;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Arrays;
+
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JSplitPane;
+import javax.swing.KeyStroke;
+
+import de.mediathekview.mlib.daten.Sender;
 import de.mediathekview.mlib.tool.Datum;
 import de.mediathekview.mlib.tool.Listener;
 import mediathek.MediathekGui;
@@ -30,16 +51,12 @@ import mediathek.daten.Column;
 import mediathek.daten.ColumnManagerFactory;
 import mediathek.daten.DatenAbo;
 import mediathek.gui.dialog.DialogEditAbo;
-import mediathek.tool.*;
-
-import javax.swing.*;
-
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.Arrays;
+import mediathek.tool.BeobTableHeader;
+import mediathek.tool.CellRendererAbo;
+import mediathek.tool.GuiFunktionen;
+import mediathek.tool.HinweisKeineAuswahl;
+import mediathek.tool.MVTable;
+import mediathek.tool.TModelAbo;
 
 @SuppressWarnings("serial")
 public class GuiAbo extends PanelVorlage {
@@ -147,7 +164,7 @@ public class GuiAbo extends PanelVorlage {
         });
 
         //Filter
-        final String[] sender = GuiFunktionen.addLeerListe(daten.getFilmeLaden().getSenderNamen());
+        final String[] sender = GuiFunktionen.addLeerListe(Sender.values());
         jcbSender.setModel(new javax.swing.DefaultComboBoxModel<>(sender));
         jcbSender.addActionListener(l -> tabelleLaden());
 

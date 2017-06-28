@@ -24,9 +24,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.Iterator;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -35,17 +33,18 @@ import javax.swing.JPanel;
 import com.jidesoft.utils.SystemInfo;
 
 import de.mediathekview.mlib.Const;
+import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.daten.ListeFilme;
+import de.mediathekview.mlib.daten.Qualities;
+import de.mediathekview.mlib.daten.Sender;
 import de.mediathekview.mlib.filmlisten.FilmlisteLesen;
 import de.mediathekview.mlib.filmlisten.WriteFilmlistJson;
 import de.mediathekview.mlib.tool.Duration;
-import de.mediathekview.mlib.tool.Functions;
 import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.config.Daten;
 import mediathek.config.MVConfig;
 import mediathek.gui.dialogEinstellungen.PanelFilmlisten;
-import mediathek.tool.FormatterUtil;
 
 @SuppressWarnings("serial")
 public class GuiDebug extends JPanel {
@@ -58,7 +57,7 @@ public class GuiDebug extends JPanel {
         super();
         initComponents();
         daten = d;
-        sender = daten.getFilmeLaden().getSenderNamen();
+        //sender = daten.getFilmeLaden().getSenderNamen();
         buttonSender = new JButton[sender.length];
 
         jPanelFilmlisteLaden.setLayout(new GridLayout(1, 1));
@@ -68,10 +67,16 @@ public class GuiDebug extends JPanel {
         jPanelStarts.add(new PanelInfoStarts());
 
         //Tab1 Sender löschen Panel füllen
-        for (int i = 0; i < daten.getFilmeLaden().getSenderNamen().length; ++i) {
-            buttonSender[i] = new JButton(sender[i]);
-            buttonSender[i].addActionListener(new BeobSenderLoeschen(sender[i]));
+        int i = 0;
+        for (Sender s : Sender.values()) {
+        	buttonSender[i] = new JButton(s.getName());
+        	buttonSender[i].addActionListener(new BeobSenderLoeschen(s.getName()));
+        	i++;
         }
+//        for (int i = 0; i < daten.getFilmeLaden().getSenderNamen().length; ++i) {
+//            buttonSender[i] = new JButton(sender[i]);
+//            buttonSender[i].addActionListener(new BeobSenderLoeschen(sender[i]));
+//        }
         addSender();
         jButtonNeuLaden.addActionListener(ae
                 -> {
@@ -98,53 +103,23 @@ public class GuiDebug extends JPanel {
             Listener.notify(Listener.EREIGNIS_BLACKLIST_GEAENDERT, GuiDebug.class.getSimpleName());
         });
         jButtonFehler.addActionListener(e -> Log.endMsg());
-        jButtonCheck.addActionListener(e -> daten.getListeFilme().check());
 
-        jButtonClean.addActionListener(ae -> cleanList());
         btnPathDiff.addActionListener(new BeobPfad());
         btnDiff.addActionListener((ActionEvent e)
                 -> {
-            ListeFilme listeFilme = new ListeFilme();
-            final HashSet<String> hash = new HashSet<>(listeFilme.size() + 1, 1);
-            new FilmlisteLesen().readFilmListe(txtDiff.getText(), listeFilme, 0);
-
-            // ==========================================
-            for (DatenFilm f : listeFilme) {
-                if (f.arr[DatenFilm.FILM_SENDER].equals(Const.KIKA)) {
-                    // beim KIKA ändern sich die URLs laufend
-                    hash.add(f.arr[DatenFilm.FILM_THEMA] + f.arr[DatenFilm.FILM_TITEL]);
-                } else if (!cbkUrl.isSelected()) {
-                    hash.add(f.getIndex());
-                } else {
-                    hash.add(f.getUrl());
-                }
-            }
+            ListeFilme listeFilme = new FilmlisteLesen().readFilmListe(txtDiff.getText(), 0);
+            //TODO: Nicklas kontrolle
+            //new FilmlisteLesen().readFilmListe(txtDiff.getText(), listeFilme, 0);
 
             System.out.println("---------------------");
             System.out.println("vorher: " + daten.getListeFilme().size());
-
-            Iterator<DatenFilm> it = daten.getListeFilme().iterator();
-            while (it.hasNext()) {
-                DatenFilm f = it.next();
-                if (f.arr[DatenFilm.FILM_SENDER].equals(Const.KIKA)) {
-                    // beim KIKA ändern sich die URLs laufend
-                    if (hash.contains(f.arr[DatenFilm.FILM_THEMA] + f.arr[DatenFilm.FILM_TITEL])) {
-                        it.remove();
-                    }
-                } else if (!cbkUrl.isSelected()) {
-                    if (hash.contains(f.getIndex())) {
-                        it.remove();
-                    }
-                } else if (hash.contains(f.getUrl())) {
-                    it.remove();
-                }
-            }
+            ListeFilme lf = daten.getListeFilme();
+            lf.removeAll(listeFilme);
 
             System.out.println("danach: " + daten.getListeFilme().size());
             new WriteFilmlistJson().filmlisteSchreibenJson(Daten.getDateiFilmliste(), daten.getListeFilme());
 
             Listener.notify(Listener.EREIGNIS_BLACKLIST_GEAENDERT, GuiDebug.class.getSimpleName());
-            hash.clear();
         });
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -162,10 +137,10 @@ public class GuiDebug extends JPanel {
 
             ListeFilme listeFilme = new ListeFilme();
             HashSet<String> hash = new HashSet<>();
-            daten.getListeFilme().stream().filter(film -> !hash.contains(film.arr[DatenFilm.FILM_URL]))
+            daten.getListeFilme().stream().filter(film -> !hash.contains(film.getUrl(Qualities.NORMAL).toString()))
                     .forEach(film
                             -> {
-                        hash.add(film.arr[DatenFilm.FILM_URL]);
+                        hash.add(film.getUrl(Qualities.NORMAL).toString());
                         listeFilme.add(film);
                     });
             hash.clear();
@@ -179,16 +154,16 @@ public class GuiDebug extends JPanel {
             ListeFilme listeFilme = new ListeFilme();
             HashSet<String> hash = new HashSet<>();
             HashSet<String> hashDoppelt = new HashSet<>();
-            for (DatenFilm film : daten.getListeFilme()) {
-                if (hash.contains(film.arr[DatenFilm.FILM_URL])) {
-                    hashDoppelt.add(film.arr[DatenFilm.FILM_URL]);
+            for (Film film : daten.getListeFilme()) {
+                if (hash.contains(film.getUrl(Qualities.NORMAL).toString())) {
+                    hashDoppelt.add(film.getUrl(Qualities.NORMAL).toString());
                 } else {
-                    hash.add(film.arr[DatenFilm.FILM_URL]);
+                    hash.add(film.getUrl(Qualities.NORMAL).toString());
                 }
             }
             hash.clear();
-            for (DatenFilm film : daten.getListeFilme()) {
-                if (hashDoppelt.contains(film.arr[DatenFilm.FILM_URL])) {
+            for (Film film : daten.getListeFilme()) {
+                if (hashDoppelt.contains(film.getUrl(Qualities.NORMAL).toString())) {
                     listeFilme.add(film);
                 }
             }
@@ -200,7 +175,7 @@ public class GuiDebug extends JPanel {
             ListeFilme listeFilme = new ListeFilme();
             HashSet<String> hash = new HashSet<>();
             HashSet<String> hashDoppelt = new HashSet<>();
-            for (DatenFilm film : daten.getListeFilme()) {
+            for (Film film : daten.getListeFilme()) {
                 String tt = film.getIndexAddOld();
                 if (hash.contains(tt)) {
                     hashDoppelt.add(tt);
@@ -209,7 +184,7 @@ public class GuiDebug extends JPanel {
                 }
             }
             hash.clear();
-            for (DatenFilm film : daten.getListeFilme()) {
+            for (Film film : daten.getListeFilme()) {
                 String tt = film.getIndexAddOld();
                 if (hashDoppelt.contains(tt)) {
                     listeFilme.add(film);
@@ -223,8 +198,8 @@ public class GuiDebug extends JPanel {
             ListeFilme listeFilme = new ListeFilme();
             HashSet<String> hash = new HashSet<>();
             HashSet<String> hashDoppelt = new HashSet<>();
-            for (DatenFilm film : daten.getListeFilme()) {
-                String tt = film.arr[DatenFilm.FILM_THEMA].toLowerCase() + film.arr[DatenFilm.FILM_TITEL].toLowerCase() + film.arr[DatenFilm.FILM_URL];
+            for (Film film : daten.getListeFilme()) {
+                String tt = film.getThema().toLowerCase() + film.getTitel().toLowerCase() + film.getUrl(Qualities.NORMAL).toString();
                 if (hash.contains(tt)) {
                     hashDoppelt.add(tt);
                 } else {
@@ -232,8 +207,8 @@ public class GuiDebug extends JPanel {
                 }
             }
             hash.clear();
-            for (DatenFilm film : daten.getListeFilme()) {
-                String tt = film.arr[DatenFilm.FILM_THEMA].toLowerCase() + film.arr[DatenFilm.FILM_TITEL].toLowerCase() + film.arr[DatenFilm.FILM_URL];
+            for (Film film : daten.getListeFilme()) {
+                String tt = film.getThema().toLowerCase() + film.getTitel().toLowerCase() + film.getUrl(Qualities.NORMAL).toString();
                 if (hashDoppelt.contains(tt)) {
                     listeFilme.add(film);
                 }
@@ -282,7 +257,7 @@ public class GuiDebug extends JPanel {
                 -> {
             String url = jTextFieldLiveStreams.getText();
             ListeFilme tmpListe = new ListeFilme();
-            new FilmlisteLesen().readFilmListe(url, tmpListe, 0 /*all days*/);
+            new FilmlisteLesen().readFilmListe(url, 0 /*all days*/);
             addLive(tmpListe);
             tmpListe.clear();
             System.gc();
@@ -292,7 +267,7 @@ public class GuiDebug extends JPanel {
         });
         jButtonDelLive.addActionListener(e
                 -> {
-            daten.getListeFilme().removeIf(f -> f.arr[DatenFilm.FILM_THEMA].equals(ListeFilme.THEMA_LIVE));
+            daten.getListeFilme().removeIf(f -> f.getThema().equals(Const.THEMA_LIVESTREAM));
             daten.getListeBlacklist().filterListe();
             Listener.notify(Listener.EREIGNIS_BLACKLIST_GEAENDERT, GuiDebug.class.getSimpleName());
         });
@@ -306,7 +281,7 @@ public class GuiDebug extends JPanel {
             return;
         }
 
-        daten.getListeFilme().removeIf(f -> f.arr[DatenFilm.FILM_THEMA].equals(ListeFilme.THEMA_LIVE));
+        daten.getListeFilme().removeIf(f -> f.getThema().equals(Const.THEMA_LIVESTREAM));
         listeEinsortieren.forEach(daten.getListeFilme()::add);
     }
 
@@ -329,23 +304,6 @@ public class GuiDebug extends JPanel {
             ++nr;
         }
         jPanelLoeschen.repaint();
-    }
-
-    // clean list
-    public void cleanList() {
-        int count = 0;
-        //TODO: Nicklas kontrolle
-        //Log.sysLog("cleanList start: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(System.currentTimeMillis()));
-        Log.sysLog("cleanList start: " + LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm));
-        daten.getListeFilme().forEach(Functions::unescape);
-        new WriteFilmlistJson().filmlisteSchreibenJson(Daten.getDateiFilmliste(), daten.getListeFilme());
-
-        Listener.notify(Listener.EREIGNIS_BLACKLIST_GEAENDERT, GuiDebug.class.getSimpleName());
-
-        //TODO: Nicklas kontrolle
-        //Log.sysLog("cleanList stop: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(System.currentTimeMillis()));
-        Log.sysLog("cleanList stop: " + LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm));
-        Log.sysLog("cleanList count: " + count);
     }
 
 //    private void urlTauschen(DatenFilm film, String urlSeite) {
@@ -475,8 +433,6 @@ public class GuiDebug extends JPanel {
         jPanelLoeschen = new javax.swing.JPanel();
         jButtonFilmlisteLoeschen = new javax.swing.JButton();
         jButtonNeuLaden = new javax.swing.JButton();
-        jButtonCheck = new javax.swing.JButton();
-        jButtonClean = new javax.swing.JButton();
         javax.swing.JPanel jPanelTools = new javax.swing.JPanel();
         jButtonFehler = new javax.swing.JButton();
         jButtonAllesSpeichern = new javax.swing.JButton();
@@ -543,9 +499,7 @@ public class GuiDebug extends JPanel {
 
         jButtonNeuLaden.setText("gespeicherte Filmliste neu laden");
 
-        jButtonCheck.setText("Check Filmliste");
 
-        jButtonClean.setText("Clean Filmliste (unescape)");
 
         javax.swing.GroupLayout jPanelFilmlisteLayout = new javax.swing.GroupLayout(jPanelFilmliste);
         jPanelFilmliste.setLayout(jPanelFilmlisteLayout);
@@ -561,15 +515,12 @@ public class GuiDebug extends JPanel {
                                 .addComponent(jButtonFilmlisteLoeschen)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButtonNeuLaden))
-                            .addGroup(jPanelFilmlisteLayout.createSequentialGroup()
-                                .addComponent(jButtonCheck)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButtonClean, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            )
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
-        jPanelFilmlisteLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jButtonCheck, jButtonFilmlisteLoeschen, jButtonNeuLaden});
+        jPanelFilmlisteLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] { jButtonFilmlisteLoeschen, jButtonNeuLaden});
 
         jPanelFilmlisteLayout.setVerticalGroup(
             jPanelFilmlisteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -578,10 +529,6 @@ public class GuiDebug extends JPanel {
                 .addGroup(jPanelFilmlisteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonFilmlisteLoeschen)
                     .addComponent(jButtonNeuLaden))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanelFilmlisteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButtonCheck)
-                    .addComponent(jButtonClean))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanelSender, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -746,8 +693,6 @@ public class GuiDebug extends JPanel {
     private javax.swing.JCheckBox cbkUrl;
     private javax.swing.JButton jButtonAddOld;
     private javax.swing.JButton jButtonAllesSpeichern;
-    private javax.swing.JButton jButtonCheck;
-    private javax.swing.JButton jButtonClean;
     private javax.swing.JButton jButtonDelLive;
     private javax.swing.JButton jButtonFehler;
     private javax.swing.JButton jButtonFilmlisteLoeschen;
