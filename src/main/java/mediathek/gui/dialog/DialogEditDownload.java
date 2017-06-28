@@ -166,14 +166,15 @@ public class DialogEditDownload extends JDialog {
         textfeldListe[DatenDownload.DOWNLOAD_URL].setText(datenDownload.arr[DatenDownload.DOWNLOAD_URL]);
         textfeldListe[DatenDownload.DOWNLOAD_URL_RTMP].setText(datenDownload.arr[DatenDownload.DOWNLOAD_URL_RTMP]);
 
-        final String size;
-        if (jRadioButtonResHd.isSelected()) {
-            size = dateiGroesse_HD;
-        } else if (jRadioButtonResLo.isSelected()) {
-            size = dateiGroesse_Klein;
-        } else {
-            size = dateiGroesse_Hoch;
-        }
+        //TODO: Nicklas dass dann auch weg wegen unten?
+//        final String size;
+//        if (jRadioButtonResHd.isSelected()) {
+//            
+//        } else if (jRadioButtonResLo.isSelected()) {
+//            size = dateiGroesse_Klein;
+//        } else {
+//            size = dateiGroesse_Hoch;
+//        }
         if (datenDownload.art == DatenDownload.ART_PROGRAMM && datenDownload.pSet != null) {
             // muss noch der Programmaufruf neu gebaut werden
             DatenDownload d = new DatenDownload(datenDownload.pSet, datenDownload.film, datenDownload.quelle, datenDownload.abo,
@@ -185,7 +186,8 @@ public class DialogEditDownload extends JDialog {
             textfeldListe[DatenDownload.DOWNLOAD_PROGRAMM_AUFRUF].setText(datenDownload.arr[DatenDownload.DOWNLOAD_PROGRAMM_AUFRUF]);
             textfeldListe[DatenDownload.DOWNLOAD_PROGRAMM_AUFRUF_ARRAY].setText(datenDownload.arr[DatenDownload.DOWNLOAD_PROGRAMM_AUFRUF_ARRAY]);
         }
-        datenDownload.setGroesse(size);
+      //TODO: Nicklas kann also weg?
+        //datenDownload.setGroesse(size);
     }
 
     private void setExtra() {
@@ -327,7 +329,7 @@ public class DialogEditDownload extends JDialog {
                     gridbag.setConstraints(jLabelFilmHD, c);
                     jPanelExtra.add(jLabelFilmHD);
                     if (datenDownload.film != null) {
-                        jLabelFilmHD.setVisible(datenDownload.film.isHD());
+                        jLabelFilmHD.setVisible(datenDownload.film.hasHD());
                     } else {
                         jLabelFilmHD.setVisible(false);
                     }
