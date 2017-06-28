@@ -19,12 +19,39 @@
  */
 package mediathek.gui.dialogEinstellungen;
 
+import java.awt.Color;
+import java.awt.FileDialog;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.net.URISyntaxException;
+import java.util.LinkedList;
+import java.util.logging.Level;
+
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
 import com.jidesoft.utils.SystemInfo;
-import de.mediathekview.mlib.daten.DatenFilm;
+
+import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.FilenameUtils;
 import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
-import mediathek.config.*;
+import mediathek.config.Daten;
+import mediathek.config.Icons;
+import mediathek.config.Konstanten;
+import mediathek.config.MVColor;
+import mediathek.config.MVConfig;
 import mediathek.controller.IoXmlSchreiben;
 import mediathek.daten.DatenProg;
 import mediathek.daten.DatenPset;
@@ -33,22 +60,14 @@ import mediathek.file.GetFile;
 import mediathek.gui.PanelVorlage;
 import mediathek.gui.actions.UrlHyperlinkAction;
 import mediathek.gui.dialog.DialogHilfe;
-import mediathek.tool.*;
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
-
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
-import java.net.URISyntaxException;
-import java.util.LinkedList;
-import java.util.logging.Level;
+import mediathek.tool.CellRendererProgramme;
+import mediathek.tool.CellRendererPset;
+import mediathek.tool.GuiFunktionen;
+import mediathek.tool.GuiFunktionenProgramme;
+import mediathek.tool.HinweisKeineAuswahl;
+import mediathek.tool.MVTable;
+import mediathek.tool.TModel;
+import mediathek.tool.TextCopyPaste;
 
 @SuppressWarnings("serial")
 public class PanelPsetLang extends PanelVorlage {
@@ -285,19 +304,19 @@ public class PanelPsetLang extends PanelVorlage {
         if (jRadioButtonAufloesungNormal.isSelected()) {
             DatenPset pset = getPset();
             if (pset != null) {
-                pset.arr[DatenPset.PROGRAMMSET_AUFLOESUNG] = DatenFilm.AUFLOESUNG_NORMAL;
+                pset.arr[DatenPset.PROGRAMMSET_AUFLOESUNG] = Qualities.NORMAL.name();
             }
         }
         if (jRadioButtonAufloesungHD.isSelected()) {
             DatenPset pset = getPset();
             if (pset != null) {
-                pset.arr[DatenPset.PROGRAMMSET_AUFLOESUNG] = DatenFilm.AUFLOESUNG_HD;
+                pset.arr[DatenPset.PROGRAMMSET_AUFLOESUNG] = Qualities.HD.name();
             }
         }
         if (jRadioButtonAufloesungKlein.isSelected()) {
             DatenPset pset = getPset();
             if (pset != null) {
-                pset.arr[DatenPset.PROGRAMMSET_AUFLOESUNG] = DatenFilm.AUFLOESUNG_KLEIN;
+                pset.arr[DatenPset.PROGRAMMSET_AUFLOESUNG] = Qualities.SMALL.name();
             }
         }
     }
@@ -378,11 +397,11 @@ public class PanelPsetLang extends PanelVorlage {
             jCheckBoxButton.setSelected(pSet.istButton());
             jCheckBoxAbo.setSelected(pSet.istAbo());
             jButtonAbspielen.setBackground(pSet.istAbspielen() ? MVColor.BUTTON_SET_ABSPIELEN.color : null);
-            switch (pSet.arr[DatenPset.PROGRAMMSET_AUFLOESUNG]) {
-                case DatenFilm.AUFLOESUNG_HD:
+            switch (Qualities.valueOf(pSet.arr[DatenPset.PROGRAMMSET_AUFLOESUNG])) {
+                case NORMAL:
                     jRadioButtonAufloesungHD.setSelected(true);
                     break;
-                case DatenFilm.AUFLOESUNG_KLEIN:
+                case SMALL:
                     jRadioButtonAufloesungKlein.setSelected(true);
                     break;
                 default:
