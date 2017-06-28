@@ -31,13 +31,10 @@ public class TModelFilm extends TModel {
 
     public TModelFilm(Object[][] data, Object[] columnNames) {
         super(data, columnNames);
-        //TODO: Nicklas kontrolle
         types = new Class<?>[FilmColumns.values().length];
         for (FilmColumns enumi : FilmColumns.values()) {
         	int i = enumi.getId();
         	if(i == DownloadColumns.REF.getId()) {
-        		//TODO: Nicklas kontrolle
-        		//types[i] = DatenFilm.class;
         		types[i] = Film.class;
         		break;
         	}
@@ -51,32 +48,10 @@ public class TModelFilm extends TModel {
 	            case GROESSE:
 	                types[i] = MVFilmSize.class;
 	                break;
-//	            case DownloadColumns.REF.getId():
-//	                //types[i] = DatenFilm.class;
-//	                break;
 	            default:
 	                types[i] = String.class;
 	        }
 	    }
-	
-//        for (int i = 0; i < DatenFilm.MAX_ELEM; ++i) {
-//            switch (i) {
-//                case FilmColumns.NR.getId():
-//                    types[i] = Integer.class;
-//                    break;
-//                case FilmColumns.DATUM.getId():
-//                    types[i] = Datum.class;
-//                    break;
-//                case FilmColumns.GROESSE.getId():
-//                    types[i] = MVFilmSize.class;
-//                    break;
-//                case DownloadColumns.REF.getId():
-//                    types[i] = DatenFilm.class;
-//                    break;
-//                default:
-//                    types[i] = String.class;
-//            }
-//        }
     }
 
     @Override

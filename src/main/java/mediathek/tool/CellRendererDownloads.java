@@ -339,8 +339,6 @@ public class CellRendererDownloads extends DefaultTableCellRenderer {
                     break;
                 case DatenDownload.DOWNLOAD_HD:
                     setHorizontalAlignment(SwingConstants.CENTER);
-                    //TODO: Nicklas kontrolle
-                    //if (datenDownload.film != null && datenDownload.film.isHD()) {
                     if (datenDownload.film != null && datenDownload.film.hasHD()) {
                         setIcon(ja_16);
                     } else {

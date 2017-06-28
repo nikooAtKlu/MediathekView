@@ -62,9 +62,7 @@ public class MVInfoFile {
             pfad = GuiFunktionen.getStandardDownloadPath();
         }
         if (titel.isEmpty()) {
-        	//TODO: Nicklas kontrolle
-            //titel = film.arr[DatenFilm.FILM_SENDER].replace(" ", "-") + ".txt";
-            titel = film.getSender().toString().replace(" ", "-") + ".txt";
+            titel = film.getSender().getName().replace(" ", "-") + ".txt";
         } else {
             titel = titel + ".txt";
         }
@@ -78,7 +76,7 @@ public class MVInfoFile {
         Path path = Paths.get(dialog.ziel);
         
         try (BufferedWriter br = new BufferedWriter(new OutputStreamWriter(new DataOutputStream(Files.newOutputStream(path))))) {
-            br.write(FilmColumns.SENDER + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + film.getSender());
+            br.write(FilmColumns.SENDER + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + film.getSender().getName());
             br.write("\n");
             br.write(FilmColumns.THEMA + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + film.getThema());
             br.write("\n\n");
@@ -90,8 +88,7 @@ public class MVInfoFile {
             br.write("\n");
             br.write(FilmColumns.DAUER + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + film.getDuration());
             br.write("\n");
-            //br.write(DatenDownload.COLUMN_NAMES[DatenDownload.DOWNLOAD_GROESSE] + ":  " + film.arr[DatenFilm.FILM_GROESSE]);
-            br.write(FilmColumns.GROESSE + ":  " + film.getFileSize(Qualities.NORMAL)); // Welche Qualitie
+            br.write(FilmColumns.GROESSE + ":  " + film.getFileSize(Qualities.NORMAL));
             br.write("\n\n");
 
             br.write(FilmColumns.WEBSEITE + "\n");
@@ -101,12 +98,6 @@ public class MVInfoFile {
             br.write(FilmColumns.URL + "\n");
             br.write(film.getUrl(Qualities.NORMAL).toString());
             br.write("\n\n");
-            //TODO: Nicklas kann wohl weg?
-//            if (!film.arr[DatenFilm.FILM_URL_RTMP].isEmpty()) {
-//                br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_URL_RTMP] + '\n');
-//                br.write(film.arr[DatenFilm.FILM_URL_RTMP]);
-//                br.write("\n\n");
-//            }
 
             int anz = 0;
             for (String s : film.getBeschreibung().split(" ")) {
@@ -165,8 +156,6 @@ public class MVInfoFile {
 
             if (datenDownload.film != null) {
                 int anz = 0;
-                //TODO: Nicklas kontrolle
-                //for (String s : datenDownload.film.arr[DatenFilm.FILM_BESCHREIBUNG].split(" ")) {
                 for (String s : datenDownload.film.getBeschreibung().split(" ")) {
                     anz += s.length();
                     br.write(s + ' ');
