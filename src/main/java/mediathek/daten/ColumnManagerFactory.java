@@ -2,6 +2,7 @@ package mediathek.daten;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 public class ColumnManagerFactory {
     private static ColumnManagerFactory instance;
@@ -103,4 +104,16 @@ public class ColumnManagerFactory {
     	}
 		return names;
     }
+    
+    public List<Column> getInvisibleDownloadColumns() {
+		return Arrays.asList(new Column[]{DownloadColumns.BUTTON_START, DownloadColumns.BUTTON_DEL, DownloadColumns.REF});
+	}
+    
+    public List<Column> getInvisibleFilmColumns() {
+		return null;
+	}
+    
+    public List<Column> getInvisibleAboColumns() {
+		return null;
+	}
 }

@@ -144,15 +144,6 @@ public final class DatenDownload extends MVData<DatenDownload> {
         init();
     }
 
-
-    public static boolean anzeigen(int i) {
-        if (spaltenAnzeigen == null) {
-            return true;
-        } else {
-            return spaltenAnzeigen[i];
-        }
-    }
-
     public final void init() {
         datumFilm = getDatumForObject();
         try {
@@ -253,16 +244,10 @@ public final class DatenDownload extends MVData<DatenDownload> {
         LinkedList<MVUsedUrl> urlList = new LinkedList<>();
         for (DatenDownload d : downloads) {
             d.start = new Start();
-            try
-            {
-                urlList.add(new MVUsedUrl(zeit,
-                        d.arr[DatenDownload.DOWNLOAD_THEMA],
-                        d.arr[DatenDownload.DOWNLOAD_TITEL],
-                        new URI(d.arr[DatenDownload.DOWNLOAD_URL])));
-            }catch (URISyntaxException uriSyntaxException)
-            {
-                Log.errorLog(420002, uriSyntaxException);
-            }
+            urlList.add(new MVUsedUrl(zeit,
+                    d.arr[DatenDownload.DOWNLOAD_THEMA],
+                    d.arr[DatenDownload.DOWNLOAD_TITEL],
+                    URI.create(d.arr[DatenDownload.DOWNLOAD_URL])));
         }
         if (!urlList.isEmpty()) {
             ddaten.history.zeilenSchreiben(urlList);

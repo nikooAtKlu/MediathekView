@@ -35,8 +35,8 @@ import javax.swing.event.EventListenerList;
 import com.jidesoft.utils.SystemInfo;
 
 import de.mediathekview.mlib.Config;
+import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.daten.ListeFilme;
-import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLaden;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLadenEvent;
 import de.mediathekview.mlib.filmlisten.FilmlisteLesen;
@@ -56,7 +56,7 @@ import mediathek.tool.MVMessageDialog;
 
 public class FilmeLaden {
 
-    private final HashSet<String> hashSet = new HashSet<>();
+    private final HashSet<Integer> hashSet = new HashSet<>();
     private final ListeFilme diffListe = new ListeFilme();
 
     // private
@@ -265,8 +265,8 @@ public class FilmeLaden {
 
     private void fillHash(ListeFilme listeFilme) {
     	//TODO: Nicklas kontrolle
-    	//hashSet.addAll(listeFilme.stream().map(DatenFilm::getUrlHistory).collect(Collectors.toList()));
-        hashSet.addAll(listeFilme.stream().map(f -> f.getUrl(Qualities.NORMAL).toString()).collect(Collectors.toList()));
+//    	hashSet.addAll(listeFilme.stream().map(DatenFilm::getUrlHistory).collect(Collectors.toList()));
+    	hashSet.addAll(listeFilme.stream().map(Film::hashCode).collect(Collectors.toList()));
     }
 
     /**
@@ -275,13 +275,13 @@ public class FilmeLaden {
      * @param listeFilme the searchable list
      */
     private void findAndMarkNewFilms(ListeFilme listeFilme) {
-        listeFilme.neueFilme = false;
+    	listeFilme.isNeueFilme = false;
 
-        listeFilme.parallelStream().peek(film -> film.setNew(false)).filter(film -> !hashSet.contains(film.getUrlHistory()))
+        listeFilme.parallelStream().peek(film -> film.setNeu(false)).filter(film -> !hashSet.contains(film.hashCode()))
                 .forEach(film
                         -> {
-                    film.setNew(true);
-                    listeFilme.neueFilme = true;
+                    film.setNeu(true);
+                    listeFilme.isNeueFilme = true;
                 });
 
         hashSet.clear();

@@ -318,7 +318,9 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
                     object[i] = download.mVFilmSize;
                 } else if (i == DatenDownload.DOWNLOAD_REF) {
                     object[i] = download;
-                } else if (i != DatenDownload.DOWNLOAD_URL && !DatenDownload.anzeigen(i)) {
+                //} else if (i != DatenDownload.DOWNLOAD_URL && !DatenDownload.anzeigen(i)) {
+                } else if (i != DatenDownload.DOWNLOAD_URL && 
+                		!ColumnManagerFactory.getInstance().getInvisibleDownloadColumns().contains(ColumnManagerFactory.getInstance().getDownloadColumnById(i))) {
                     // Filmnr und URL immer füllen, egal ob angezeigt
                     object[i] = "";
                 } else {
