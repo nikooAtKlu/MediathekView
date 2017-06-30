@@ -236,7 +236,7 @@ public class CellRendererFilme extends DefaultTableCellRenderer {
             if (live) {
                 // bei livestreams keine History anzeigen
                 c.setForeground(MVColor.FILM_LIVESTREAM.color);
-            } else if (history.urlPruefen(datenFilm.getUrlHistory())) {
+            } else if (history.urlPruefen(datenFilm.getUrl(Qualities.NORMAL))) {
                 if (!isSelected) {
                     c.setBackground(MVColor.FILM_HISTORY.color);
                 }
