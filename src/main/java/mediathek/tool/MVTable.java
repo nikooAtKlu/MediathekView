@@ -511,17 +511,22 @@ public final class MVTable extends JTable {
             if (invisibleColumns.contains(col)) {
                 // geänderte Ansicht der Spalten abfragen
                 breiten.put(col,0);
-            } else if (breiten.get(col) == 0) {
+            } else if (breiten.containsKey(col) && breiten.get(col) == 0) {
                 breiten.put(col,100);
             }
-            if (breiten.get(col) == 0) {
-                this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMinWidth(0);
-                this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setPreferredWidth(0);
-                this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMaxWidth(0);
-            } else {
-                this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMinWidth(10);
-                this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMaxWidth(3000);
-                this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setPreferredWidth(breiten.get(col));
+            if(i< this.getColumnCount())
+            {
+                if (breiten.containsKey(col) && breiten.get(col) == 0)
+                {
+                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMinWidth(0);
+                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setPreferredWidth(0);
+                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMaxWidth(0);
+                } else
+                {
+                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMinWidth(10);
+                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMaxWidth(3000);
+                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setPreferredWidth(breiten.get(col));
+                }
             }
             i++;
         }
@@ -536,8 +541,11 @@ public final class MVTable extends JTable {
 
         int a = 0;
         for (Column col : columns) {
-            breiten.put(col,getColumnModel().getColumn(
-                    this.convertColumnIndexToView(a)).getWidth());
+            if(a < this.getColumnCount())
+            {
+                breiten.put(col, getColumnModel().getColumn(
+                        this.convertColumnIndexToView(a)).getWidth());
+            }
             a++;
         }
 

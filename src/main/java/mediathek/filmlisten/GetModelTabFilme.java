@@ -26,17 +26,14 @@ import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.daten.ListeFilme;
 import de.mediathekview.mlib.daten.Qualities;
 import mediathek.config.Daten;
+import mediathek.daten.ColumnManagerFactory;
+import mediathek.daten.FilmColumns;
 import mediathek.tool.Filter;
 import mediathek.tool.MVTable;
 import mediathek.tool.TModel;
 import mediathek.tool.TModelFilm;
 
 public class GetModelTabFilme {
-    private static final String[] COLUMN_NAMES = new String[] {"Nr", "Sender", "Thema", "Titel",
-            "", "", "Datum", "Zeit", "Dauer", "Größe [MB]", "HD", "UT",
-            "Beschreibung", "Geo", "Url", "Website", "Abo",
-            "Url Untertitel", "Url RTMP", "Url Auth", "Url Klein", "Url RTMP Klein", "Url HD", "Url RTMP HD", "Url History", "neu",
-            "DatumL", "Ref"};;
     private static final String THEMA_LIVE = "Livestream";
 
     public static synchronized void getModelTabFilme(ListeFilme listeFilme, Daten ddaten, MVTable table,
@@ -45,11 +42,11 @@ public class GetModelTabFilme {
         // Model für die Tabelle Filme zusammenbauen
         if (listeFilme.isEmpty()) {
             // wenn die Liste leer ist, dann Tschüss
-            table.setModel(new TModelFilm(new Object[][]{}, COLUMN_NAMES));
+            table.setModel(new TModelFilm(new Object[][]{}, FilmColumns.values()));
             return;
         }
         // dann ein neues Model anlegen
-        TModel tModel = new TModelFilm(new Object[][]{}, COLUMN_NAMES);
+        TModel tModel = new TModelFilm(new Object[][]{}, FilmColumns.values());
         if (filterSender.isEmpty() && filterThema.isEmpty() && filterTitel.isEmpty() && filterThemaTitel.isEmpty() && filterIrgendwo.isEmpty() && laenge == 0
                 && !keineAbos && !kGesehen && !nurHd && !nurUt && !live && !nurNeue) {
             // dann ganze Liste laden
