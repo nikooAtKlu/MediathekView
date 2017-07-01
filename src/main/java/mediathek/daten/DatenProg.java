@@ -36,12 +36,9 @@ public class DatenProg extends MVData<DatenProg> {
 
     public static final int MAX_ELEM = 8;
     public static final String TAG = "Programm";
-    public static final String[] COLUMN_NAMES = {"Beschreibung", "Zieldateiname", "Programm",
-        "Schalter", "Präfix", "Suffix", "Restart", "Downloadmanager"};
     public static final String[] XML_NAMES = {"Programmname", "Zieldateiname", "Programmpfad",
         "Programmschalter", "Praefix", "Suffix", "Restart", "Downloadmanager"};
 
-    public static boolean[] spaltenAnzeigen = new boolean[MAX_ELEM];
     public String[] arr;
 
     public DatenProg() {

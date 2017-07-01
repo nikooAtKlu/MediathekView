@@ -127,17 +127,10 @@ public class MVFilmInformationOSX implements IFilmInformation {
         panel.setLayout(gridbag);
         int zeile = 0;
         for (int i = 0; i < labelArrNames.length; ++i) {
-            if (i == DatenFilm.FILM_URL_RTMP
-                    || i == DatenFilm.FILM_URL_AUTH
-                    || i == DatenFilm.FILM_URL_HD
-                    || i == DatenFilm.FILM_URL_RTMP_HD
-                    || i == DatenFilm.FILM_URL_KLEIN
-                    || i == DatenFilm.FILM_URL_RTMP_KLEIN
-                    || i == DatenFilm.FILM_ABSPIELEN
-                    || i == DatenFilm.FILM_AUFZEICHNEN
-                    || i == DatenFilm.FILM_DATUM_LONG
-                    || i == DatenFilm.FILM_URL_HISTORY
-                    || i == DatenFilm.FILM_REF) {
+            FilmColumns col = ColumnManagerFactory.getInstance().getFilmColumnById(i);
+            if (col.equals(FilmColumns.URL)
+                    || col.equals(FilmColumns.FILM_ABSPIELEN)
+                    || col.equals(FilmColumns.FILM_AUFZEICHNEN)) {
                 continue;
             }
             c.gridy = zeile;
@@ -236,17 +229,20 @@ public class MVFilmInformationOSX implements IFilmInformation {
         if (aktFilm == null) {
             clearAllFields();
         } else {
-            for (int i = 0; i < txtArrCont.length; ++i) {
-                txtArrCont[i].setText(aktFilm.arr[i]);
+            for (int i = 0; i < txtArrCont.length; ++i)
+            {
+                txtArrCont[i].setText(ColumnManagerFactory.getInstance().getFilmColumnById(i).getName());
             }
-            if (aktFilm.getBeschreibung().isEmpty()) {
+            if (aktFilm.getBeschreibung().isEmpty())
+            {
                 // sonst müsste die Größe gesetzt werden
                 textAreaBeschreibung.setText(" ");
-            } else {
+            } else
+            {
                 textAreaBeschreibung.setText(aktFilm.getBeschreibung());
             }
             lblUrlThemaField.setText(aktFilm.getWebsite().toString());
-            lblUrlSubtitle.setText(aktFilm.getUrlSubtitle());
+            lblUrlSubtitle.setText(aktFilm.getSubtitles().iterator().hasNext() ? aktFilm.getSubtitles().iterator().next().toString() : "");
             jLabelFilmNeu.setVisible(aktFilm.isNeu());
             jLabelFilmHD.setVisible(aktFilm.hasHD());
             jLabelFilmUT.setVisible(aktFilm.hasUT());
@@ -257,7 +253,5 @@ public class MVFilmInformationOSX implements IFilmInformation {
     @Override
     public void stateChanged(ChangeEvent changeEvent) {
         //Whenever there is a change event, reset HUD info to nothing
-        Film emptyFilm = new Film();
-        updateCurrentFilm(emptyFilm);
     }
 }

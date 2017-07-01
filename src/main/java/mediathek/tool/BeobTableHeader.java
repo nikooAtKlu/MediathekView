@@ -30,6 +30,8 @@ import java.util.*;
 
 public class BeobTableHeader extends MouseAdapter
 {
+    private final Collection<Column> invisibleColumns;
+    private final Collection<Column> allColumns;
     //rechhte Maustaste in der Tabelle
 
     private MVTable tabelle;
@@ -52,6 +54,8 @@ public class BeobTableHeader extends MouseAdapter
         {
             columns.put(column, aColumnsNotToShow == null || aColumnsNotToShow.isEmpty() || !aColumnsNotToShow.contains(column));
         }
+        invisibleColumns = aColumnsNotToShow;
+        allColumns = aColumns;
     }
 
     @Override

@@ -58,7 +58,8 @@ import mediathek.tool.EscBeenden;
 import mediathek.tool.GuiFunktionen;
 
 @SuppressWarnings("serial")
-public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
+public class MVFilmInformationLWin extends JDialog implements IFilmInformation
+{
     private JXHyperlink lblUrlThemaField;
     private JXHyperlink lblUrlSubtitle;
     private JTextArea textAreaBeschreibung;
@@ -74,7 +75,8 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
     static Point mouseDownCompCoords;
     private final JDialog dialog;
 
-    public MVFilmInformationLWin(JFrame owner) {
+    public MVFilmInformationLWin(JFrame owner)
+    {
         super(MVConfig.getBool(MVConfig.Configs.SYSTEM_FILM_INFO_TOP) ? owner : null, false);
         initComponents();
 
@@ -83,7 +85,8 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
         setTitle("Filminformation");
 
         //for (int i = 0; i < FilmColumns.values().length; ++i) {
-        for(FilmColumns colum : FilmColumns.values()) {
+        for (FilmColumns colum : FilmColumns.values())
+        {
             labelArrNames[colum.getId()] = new JLabel(colum.getName() + ':');
             labelArrNames[colum.getId()].setHorizontalAlignment(SwingConstants.RIGHT);
             labelArrNames[colum.getId()].setDoubleBuffered(true);
@@ -99,44 +102,55 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
         setExtra(jPanelExtra);
         jPanelExtra.addMouseListener(new BeobMaus());
 
-        new EscBeenden(this) {
+        new EscBeenden(this)
+        {
             @Override
-            public void beenden_(JDialog d) {
+            public void beenden_(JDialog d)
+            {
                 d.dispose();
             }
         };
 
         mouseDownCompCoords = null;
-        jPanelExtra.addMouseListener(new MouseListener() {
+        jPanelExtra.addMouseListener(new MouseListener()
+        {
             @Override
-            public void mouseReleased(MouseEvent e) {
+            public void mouseReleased(MouseEvent e)
+            {
                 mouseDownCompCoords = null;
             }
 
             @Override
-            public void mousePressed(MouseEvent e) {
+            public void mousePressed(MouseEvent e)
+            {
                 mouseDownCompCoords = e.getPoint();
             }
 
             @Override
-            public void mouseExited(MouseEvent e) {
+            public void mouseExited(MouseEvent e)
+            {
             }
 
             @Override
-            public void mouseEntered(MouseEvent e) {
+            public void mouseEntered(MouseEvent e)
+            {
             }
 
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(MouseEvent e)
+            {
             }
         });
-        jPanelExtra.addMouseMotionListener(new MouseMotionListener() {
+        jPanelExtra.addMouseMotionListener(new MouseMotionListener()
+        {
             @Override
-            public void mouseMoved(MouseEvent e) {
+            public void mouseMoved(MouseEvent e)
+            {
             }
 
             @Override
-            public void mouseDragged(MouseEvent e) {
+            public void mouseDragged(MouseEvent e)
+            {
                 Point currCoords = e.getLocationOnScreen();
                 setLocation(currCoords.x - mouseDownCompCoords.x, currCoords.y - mouseDownCompCoords.y);
             }
@@ -144,24 +158,29 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
         GuiFunktionen.setDialogDecorated(dialog, jPanelOut, MVConfig.getBool(MVConfig.Configs.SYSTEM_FILM_INFO_DECORATED));
     }
 
-    private void setExtra(JPanel jPanel) {
+    private void setExtra(JPanel jPanel)
+    {
         GridBagLayout gridbag = new GridBagLayout();
         GridBagConstraints c = new GridBagConstraints();
         lblUrlThemaField = new JXHyperlink();
         lblUrlThemaField.setDoubleBuffered(true);
         lblUrlThemaField.setMinimumSize(new Dimension(10, 10));
-        try {
+        try
+        {
             lblUrlThemaField.setAction(new UrlHyperlinkAction(parent, ""));
-        } catch (URISyntaxException ignored) {
+        } catch (URISyntaxException ignored)
+        {
         }
         lblUrlThemaField.addMouseListener(new BeobMausUrl(lblUrlThemaField));
 
         lblUrlSubtitle = new JXHyperlink();
         lblUrlSubtitle.setDoubleBuffered(true);
         lblUrlSubtitle.setMinimumSize(new Dimension(10, 10));
-        try {
+        try
+        {
             lblUrlSubtitle.setAction(new UrlHyperlinkAction(parent, ""));
-        } catch (URISyntaxException ignored) {
+        } catch (URISyntaxException ignored)
+        {
         }
         lblUrlSubtitle.addMouseListener(new BeobMausUrl(lblUrlSubtitle));
 
@@ -193,18 +212,13 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
         c.weighty = 0;
         jPanel.setLayout(gridbag);
         int zeile = 0;
-        for (int i = 0; i < labelArrNames.length; ++i) {
-            if (i == DatenFilm.FILM_URL_RTMP
-                    || i == DatenFilm.FILM_URL_AUTH
-                    || i == DatenFilm.FILM_URL_HD
-                    || i == DatenFilm.FILM_URL_RTMP_HD
-                    || i == DatenFilm.FILM_URL_KLEIN
-                    || i == DatenFilm.FILM_URL_RTMP_KLEIN
-                    || i == DatenFilm.FILM_ABSPIELEN
-                    || i == DatenFilm.FILM_AUFZEICHNEN
-                    || i == DatenFilm.FILM_DATUM_LONG
-                    || i == DatenFilm.FILM_URL_HISTORY
-                    || i == DatenFilm.FILM_REF) {
+        for (int i = 0; i < labelArrNames.length; ++i)
+        {
+            FilmColumns col = ColumnManagerFactory.getInstance().getFilmColumnById(i);
+            if (col.equals(FilmColumns.URL)
+                    || col.equals(FilmColumns.FILM_ABSPIELEN)
+                    || col.equals(FilmColumns.FILM_AUFZEICHNEN))
+            {
                 continue;
             }
             c.gridy = zeile;
@@ -222,22 +236,24 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
         jPanel.add(label);
     }
 
-    private void addLable(int i, GridBagLayout gridbag, GridBagConstraints c, JPanel panel) {
+    private void addLable(int i, GridBagLayout gridbag, GridBagConstraints c, JPanel panel)
+    {
         c.gridx = 0;
         c.weightx = 0;
         gridbag.setConstraints(labelArrNames[i], c);
         panel.add(labelArrNames[i]);
         c.gridx = 1;
         c.weightx = 1;
-        switch (ColumnManagerFactory.getInstance().getFilmColumnById(i)) {
+        switch (ColumnManagerFactory.getInstance().getFilmColumnById(i))
+        {
             case WEBSEITE:
                 gridbag.setConstraints(lblUrlThemaField, c);
                 panel.add(lblUrlThemaField);
                 break;
-//            case SUBTITEL:
-//                gridbag.setConstraints(lblUrlSubtitle, c);
-//                panel.add(lblUrlSubtitle);
-//                break;
+            //            case SUBTITEL:
+            //                gridbag.setConstraints(lblUrlSubtitle, c);
+            //                panel.add(lblUrlSubtitle);
+            //                break;
             case BESCHREIBUNG:
                 JScrollPane sp = new JScrollPane();
                 sp.setMinimumSize(new Dimension(10, 100));
@@ -265,22 +281,28 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
     }
 
     @Override
-    public void showInfo() {
+    public void showInfo()
+    {
         setAktFilm();
         super.setVisible(true);
     }
 
     @Override
-    public void updateCurrentFilm(Film film) {
+    public void updateCurrentFilm(Film film)
+    {
         aktFilm = film;
-        if (this.isVisible()) {
+        if (this.isVisible())
+        {
             setAktFilm();
         }
     }
 
-    private void setAktFilm() {
-        if (aktFilm == null) {
-            for (JTextField aTxtArrCont : txtArrCont) {
+    private void setAktFilm()
+    {
+        if (aktFilm == null)
+        {
+            for (JTextField aTxtArrCont : txtArrCont)
+            {
                 aTxtArrCont.setText("");
             }
             textAreaBeschreibung.setText(" ");
@@ -289,18 +311,22 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
             jLabelFilmNeu.setVisible(false);
             jLabelFilmHD.setVisible(false);
             jLabelFilmUT.setVisible(false);
-        } else {
-            for (int i = 0; i < txtArrCont.length; ++i) {
-                txtArrCont[i].setText(aktFilm.arr[i]);
+        } else
+        {
+            for (int i = 0; i < txtArrCont.length; ++i)
+            {
+                txtArrCont[i].setText(ColumnManagerFactory.getInstance().getFilmColumnById(i).getName());
             }
-            if (aktFilm.getBeschreibung().isEmpty()) {
+            if (aktFilm.getBeschreibung().isEmpty())
+            {
                 // sonst müsste die Größe gesetzt werden
                 textAreaBeschreibung.setText(" ");
-            } else {
+            } else
+            {
                 textAreaBeschreibung.setText(aktFilm.getBeschreibung());
             }
             lblUrlThemaField.setText(aktFilm.getWebsite().toString());
-            lblUrlSubtitle.setText(aktFilm.getUrlSubtitle());
+            lblUrlSubtitle.setText(aktFilm.getSubtitles().iterator().hasNext() ? aktFilm.getSubtitles().iterator().next().toString() : "");
             jLabelFilmNeu.setVisible(aktFilm.isNeu());
             jLabelFilmHD.setVisible(aktFilm.hasHD());
             jLabelFilmUT.setVisible(aktFilm.hasUT());
@@ -309,27 +335,30 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
     }
 
     @Override
-    public void stateChanged(ChangeEvent changeEvent) {
+    public void stateChanged(ChangeEvent changeEvent)
+    {
         //Whenever there is a change event, reset HUD info to nothing
-        Film emptyFilm = new Film();
-        updateCurrentFilm(emptyFilm);
     }
 
-    private class BeobMaus extends MouseAdapter {
+    private class BeobMaus extends MouseAdapter
+    {
 
         JCheckBox cbkTop = new JCheckBox("Immer im Vordergrund");
         JCheckBox cbkBorder = new JCheckBox("Rand anzeigen");
         JMenuItem itemClose = new JMenuItem("Ausblenden");
 
-        public BeobMaus() {
+        public BeobMaus()
+        {
             cbkTop.setSelected(MVConfig.getBool(MVConfig.Configs.SYSTEM_FILM_INFO_TOP));
-            cbkTop.addActionListener(l -> {
+            cbkTop.addActionListener(l ->
+            {
                 MVConfig.add(MVConfig.Configs.SYSTEM_FILM_INFO_TOP, Boolean.toString(cbkTop.isSelected()));
                 GuiFunktionen.setParent(dialog, MVConfig.getBool(MVConfig.Configs.SYSTEM_FILM_INFO_TOP) ? parent : null);
             });
 
             cbkBorder.setSelected(MVConfig.getBool(MVConfig.Configs.SYSTEM_FILM_INFO_DECORATED));
-            cbkBorder.addActionListener(l -> {
+            cbkBorder.addActionListener(l ->
+            {
                 MVConfig.add(MVConfig.Configs.SYSTEM_FILM_INFO_DECORATED, Boolean.toString(cbkBorder.isSelected()));
                 GuiFunktionen.setDialogDecorated(dialog, jPanelOut, MVConfig.getBool(MVConfig.Configs.SYSTEM_FILM_INFO_DECORATED));
                 //setDialogBorder();
@@ -338,20 +367,25 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
         }
 
         @Override
-        public void mousePressed(MouseEvent arg0) {
-            if (arg0.isPopupTrigger()) {
+        public void mousePressed(MouseEvent arg0)
+        {
+            if (arg0.isPopupTrigger())
+            {
                 showMenu(arg0);
             }
         }
 
         @Override
-        public void mouseReleased(MouseEvent arg0) {
-            if (arg0.isPopupTrigger()) {
+        public void mouseReleased(MouseEvent arg0)
+        {
+            if (arg0.isPopupTrigger())
+            {
                 showMenu(arg0);
             }
         }
 
-        private void showMenu(MouseEvent evt) {
+        private void showMenu(MouseEvent evt)
+        {
             JPopupMenu jPopupMenu = new JPopupMenu();
 
             jPopupMenu.add(cbkTop);
@@ -366,7 +400,8 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
     }
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents()
+    {
 
         jPanelOut = new javax.swing.JPanel();
         jPanelExtra = new javax.swing.JPanel();
@@ -378,40 +413,40 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
         javax.swing.GroupLayout jPanelExtraLayout = new javax.swing.GroupLayout(jPanelExtra);
         jPanelExtra.setLayout(jPanelExtraLayout);
         jPanelExtraLayout.setHorizontalGroup(
-            jPanelExtraLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 477, Short.MAX_VALUE)
+                jPanelExtraLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(0, 477, Short.MAX_VALUE)
         );
         jPanelExtraLayout.setVerticalGroup(
-            jPanelExtraLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 650, Short.MAX_VALUE)
+                jPanelExtraLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGap(0, 650, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout jPanelOutLayout = new javax.swing.GroupLayout(jPanelOut);
         jPanelOut.setLayout(jPanelOutLayout);
         jPanelOutLayout.setHorizontalGroup(
-            jPanelOutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelOutLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanelExtra, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                jPanelOutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanelOutLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jPanelExtra, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addContainerGap())
         );
         jPanelOutLayout.setVerticalGroup(
-            jPanelOutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelOutLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanelExtra, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                jPanelOutLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanelOutLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jPanelExtra, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanelOut, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jPanelOut, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanelOut, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jPanelOut, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();

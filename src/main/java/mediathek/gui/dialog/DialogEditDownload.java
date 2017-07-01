@@ -42,6 +42,7 @@ import javax.swing.event.DocumentListener;
 import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.Log;
 import de.mediathekview.mlib.tool.SysMsg;
+import mediathek.config.Daten;
 import mediathek.config.Icons;
 import mediathek.controller.starter.Start;
 import mediathek.daten.DatenDownload;
@@ -423,7 +424,7 @@ public class DialogEditDownload extends JDialog {
                             break;
                         case DatenDownload.DOWNLOAD_FILM_NR:
                             if (datenDownload.film != null) {
-                                textfeldListe[i].setText(datenDownload.film.nr + "");
+                                textfeldListe[i].setText(Integer.toString(Daten.getInstance().getListeFilme().indexOf(datenDownload.film)));
                             }
                             break;
                         case DatenDownload.DOWNLOAD_URL:

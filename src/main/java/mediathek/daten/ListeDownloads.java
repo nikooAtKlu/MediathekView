@@ -440,8 +440,6 @@ public class ListeDownloads extends LinkedList<DatenDownload> {
                     abo.arr[DatenAbo.ABO_PSET] = pSet.arr[DatenPset.PROGRAMMSET_NAME];
                 }
                 //dann in die Liste schreiben
-                //TODO: Nicklas kontrolle
-                //add(new DatenDownload(pSet, film, DatenDownload.QUELLE_ABO, abo, "", "", "" /*Aufloesung*/));
                 add(new DatenDownload(pSet, film, DatenDownload.QUELLE_ABO, abo, "", "", null /*Aufloesung*/));
                 gefunden = true;
             } else if (parent != null) {

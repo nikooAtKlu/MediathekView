@@ -28,8 +28,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DragSource;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 import javax.activation.DataHandler;
 import javax.swing.DropMode;
@@ -51,18 +50,15 @@ import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.config.Daten;
 import mediathek.config.MVConfig;
-import mediathek.daten.AboColumns;
-import mediathek.daten.ColumnManagerFactory;
-import mediathek.daten.DatenAbo;
-import mediathek.daten.DatenDownload;
-import mediathek.daten.DatenMediaDB;
-import mediathek.daten.DatenProg;
-import mediathek.daten.DatenPset;
-import mediathek.daten.DownloadColumns;
-import mediathek.daten.FilmColumns;
+import mediathek.daten.*;
+
+import static mediathek.daten.FilmColumns.*;
 
 @SuppressWarnings("serial")
 public final class MVTable extends JTable {
+    private Collection<Column> columns;
+    private List<Column> invisibleColumns;
+
     public enum TableType {
         STANDARD, FILME, DOWNLOADS, ABOS, PSET, PROG, MEDIA_DB
     }
@@ -72,7 +68,7 @@ public final class MVTable extends JTable {
     public static final String SORT_DESCENDING = "DESCENDING";
     public boolean iconAnzeigen = false;
     public boolean iconKlein = false;
-    private final int[] breite;
+    private final Map<Column,Integer> breiten;
     private final int[] reihe;
     private MVConfig.Configs nrDatenSystem = null;
     private TableType tabelle;
@@ -82,7 +78,6 @@ public final class MVTable extends JTable {
     private int[] selRows;
     private int[] selIndexes = null;
     private int selRow = -1;
-    private boolean[] spaltenAnzeigen;
     private MVConfig.Configs iconAnzeigenStr = null;
     private MVConfig.Configs iconKleinStr = null;
     public boolean lineBreak = true;
@@ -104,13 +99,16 @@ public final class MVTable extends JTable {
         daten = Daten.getInstance();
         setAutoCreateRowSorter(true);
         setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        invisibleColumns = new ArrayList<>();
+        breiten = new HashMap<>();
 
         String[] spaltenTitel;
         switch (tabelle) {
             case FILME:
                 //spaltenTitel = DatenFilm.COLUMN_NAMES;
                 maxSpalten = FilmColumns.values().length;
-                spaltenAnzeigen = getSpaltenEinAus(DatenFilm.spaltenAnzeigen, FilmColumns.values().length);
+                invisibleColumns = ColumnManagerFactory.getInstance().getInvisibleFilmColumns();
+                columns = ColumnManagerFactory.getInstance().getFilmColumns();
                 indexSpalte = FilmColumns.NR.getId();
                 nrDatenSystem = MVConfig.Configs.SYSTEM_EIGENSCHAFTEN_TABELLE_FILME;
                 iconAnzeigenStr = MVConfig.Configs.SYSTEM_TAB_FILME_ICON_ANZEIGEN;
@@ -120,9 +118,10 @@ public final class MVTable extends JTable {
                 this.getTableHeader().addMouseListener(new WidthAdjuster(this));
                 break;
             case DOWNLOADS:
-                //spaltenTitel = DatenDownload.COLUMN_NAMES;
+                //spaltenTitel = .COLUMN_NAMES;
                 maxSpalten = DownloadColumns.values().length;
-                spaltenAnzeigen = getSpaltenEinAus(DatenDownload.spaltenAnzeigen, DownloadColumns.values().length);
+                invisibleColumns = ColumnManagerFactory.getInstance().getInvisibleDownloadColumns();
+                columns = ColumnManagerFactory.getInstance().getDownloadColumns();
                 indexSpalte = DownloadColumns.NR.getId();
                 nrDatenSystem = MVConfig.Configs.SYSTEM_EIGENSCHAFTEN_TABELLE_DOWNLOADS;
                 iconAnzeigenStr = MVConfig.Configs.SYSTEM_TAB_DOWNLOAD_ICON_ANZEIGEN;
@@ -136,7 +135,8 @@ public final class MVTable extends JTable {
             case ABOS:
                 //spaltenTitel = DatenAbo.COLUMN_NAMES;
                 maxSpalten = AboColumns.values().length;
-                spaltenAnzeigen = getSpaltenEinAus(DatenAbo.spaltenAnzeigen, AboColumns.values().length);
+                columns = ColumnManagerFactory.getInstance().getAboColumns();
+                invisibleColumns = ColumnManagerFactory.getInstance().getInvisibleAboColumns();
                 indexSpalte = AboColumns.NR.getId();
                 nrDatenSystem = MVConfig.Configs.SYSTEM_EIGENSCHAFTEN_TABELLE_ABOS;
                 iconAnzeigenStr = MVConfig.Configs.SYSTEM_TAB_ABO_ICON_ANZEIGEN;
@@ -147,7 +147,8 @@ public final class MVTable extends JTable {
             case PSET:
                 spaltenTitel = DatenPset.COLUMN_NAMES;
                 maxSpalten = DatenPset.MAX_ELEM;
-                spaltenAnzeigen = getSpaltenEinAus(DatenPset.spaltenAnzeigen, DatenPset.MAX_ELEM);
+                columns = ColumnManagerFactory.getInstance().getPSetColumns();
+                invisibleColumns = ColumnManagerFactory.getInstance().getInvisiblePsetColumns();
                 indexSpalte = 0;
                 nrDatenSystem = null;
                 this.setModel(new TModel(new Object[][]{}, spaltenTitel));
@@ -158,7 +159,8 @@ public final class MVTable extends JTable {
             case PROG:
                 spaltenTitel = DatenProg.COLUMN_NAMES;
                 maxSpalten = DatenProg.MAX_ELEM;
-                spaltenAnzeigen = getSpaltenEinAus(DatenProg.spaltenAnzeigen, DatenProg.MAX_ELEM);
+                columns = ColumnManagerFactory.getInstance().getProgColumns();
+                invisibleColumns = ColumnManagerFactory.getInstance().getInvisibleProgColumns();
                 indexSpalte = 0;
                 nrDatenSystem = null;
                 this.setModel(new TModel(new Object[][]{}, spaltenTitel));
@@ -167,14 +169,14 @@ public final class MVTable extends JTable {
             case MEDIA_DB:
                 spaltenTitel = DatenMediaDB.COLUMN_NAMES;
                 maxSpalten = DatenMediaDB.MAX_ELEM;
-                spaltenAnzeigen = getSpaltenEinAus(new boolean[DatenMediaDB.MAX_ELEM], DatenMediaDB.MAX_ELEM);
+                columns = ColumnManagerFactory.getInstance().getMediaDbColumns();
+                invisibleColumns = ColumnManagerFactory.getInstance().getInvisibleMediaDbColumns();
                 indexSpalte = 0;
                 nrDatenSystem = MVConfig.Configs.SYSTEM_EIGENSCHAFTEN_TABELLE_MEDIA_DB;
                 this.setModel(new TModel(new Object[][]{}, spaltenTitel));
                 this.getTableHeader().addMouseListener(new WidthAdjuster(this));
                 break;
         }
-        breite = getArray(maxSpalten);
         reihe = getArray(maxSpalten);
         if (iconAnzeigenStr != null) {
             iconAnzeigen = Boolean.parseBoolean(MVConfig.get(iconAnzeigenStr));
@@ -212,7 +214,7 @@ public final class MVTable extends JTable {
         int size;
         switch (tabelle) {
             case FILME:
-                if (spaltenAnzeigen[FilmColumns.BESCHREIBUNG.getId()]) {
+                if (!invisibleColumns.contains(FilmColumns.BESCHREIBUNG)) {
                     sizeArea = MVFont.fontSize * 5;
                 } else if (lineBreak) {
                     sizeArea = MVFont.fontSize * 4;
@@ -300,9 +302,6 @@ public final class MVTable extends JTable {
                         upDown = MVConfig.get(nrDatenSystem).substring(f3 + 1);
                     }
                 }
-                if (!arrLesen(b, breite)) {
-                    ok = false;
-                }
                 if (!arrLesen(r, reihe)) {
                     ok = false;
                 }
@@ -314,7 +313,6 @@ public final class MVTable extends JTable {
                 }
             }
             if (ok) {
-                setSpaltenEinAus(breite, spaltenAnzeigen);
                 setSpalten();
                 setHeight();
             } else {
@@ -325,22 +323,6 @@ public final class MVTable extends JTable {
         }
     }
 
-    private boolean anzeigen(int i, boolean[] spaltenAnzeigen) {
-        return spaltenAnzeigen[i];
-    }
-
-    private void setSpaltenEinAus(int[] nr, boolean[] spaltenAnzeigen) {
-        for (int i = 0; i < spaltenAnzeigen.length; ++i) {
-            spaltenAnzeigen[i] = nr[i] > 0;
-        }
-    }
-
-    private boolean[] getSpaltenEinAus(boolean[] spaltenAnzeigen, int MAX_ELEM) {
-        for (int i = 0; i < MAX_ELEM; ++i) {
-            spaltenAnzeigen[i] = true;
-        }
-        return spaltenAnzeigen;
-    }
 
     public void fireTableDataChanged(boolean setSpalten) {
         if (setSpalten) {
@@ -517,26 +499,32 @@ public final class MVTable extends JTable {
 
     public void spaltenEinAus() {
         getSpalten(); // die aktuelle Breite holen
-        for (int i = 0; i < breite.length && i < this.getColumnCount(); ++i) {
-            if (!anzeigen(i, spaltenAnzeigen)) {
+        setSpaltenBreiten();
+        this.validate();
+    }
+
+    private void setSpaltenBreiten()
+    {
+        int i = 0;
+        for (Column col:columns) {
+
+            if (invisibleColumns.contains(col)) {
                 // geänderte Ansicht der Spalten abfragen
-                breite[i] = 0;
-            } else if (breite[i] == 0) {
-                breite[i] = 100; // damit sie auch zu sehen ist :)
+                breiten.put(col,0);
+            } else if (breiten.get(col) == 0) {
+                breiten.put(col,100);
             }
-        }
-        for (int i = 0; i < breite.length && i < this.getColumnCount(); ++i) {
-            if (breite[i] == 0) {
+            if (breiten.get(col) == 0) {
                 this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMinWidth(0);
                 this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setPreferredWidth(0);
                 this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMaxWidth(0);
             } else {
                 this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMinWidth(10);
                 this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMaxWidth(3000);
-                this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setPreferredWidth(breite[i]);
+                this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setPreferredWidth(breiten.get(col));
             }
+            i++;
         }
-        this.validate();
     }
 
     public void getSpalten() {
@@ -545,10 +533,14 @@ public final class MVTable extends JTable {
         for (int i = 0; i < reihe.length && i < this.getModel().getColumnCount(); ++i) {
             reihe[i] = this.convertColumnIndexToModel(i);
         }
-        for (int i = 0; i < breite.length && i < this.getModel().getColumnCount(); ++i) {
-            breite[i] = getColumnModel().getColumn(
-                    this.convertColumnIndexToView(i)).getWidth();
+
+        int a = 0;
+        for (Column col : columns) {
+            breiten.put(col,getColumnModel().getColumn(
+                    this.convertColumnIndexToView(a)).getWidth());
+            a++;
         }
+
         if (this.getRowSorter() != null) {
             listeSortKeys = this.getRowSorter().getSortKeys();
         } else {
@@ -560,25 +552,7 @@ public final class MVTable extends JTable {
         // gemerkte Einstellungen der Tabelle wieder setzten
 //        setSelected();
         try {
-            for (int i = 0; i < breite.length && i < this.getColumnCount(); ++i) {
-                if (!anzeigen(i, spaltenAnzeigen)) {
-                    // geänderte Ansicht der Spalten abfragen
-                    breite[i] = 0;
-                } else if (breite[i] == 0) {
-                    breite[i] = 100; // damit sie auch zu sehen ist :)
-                }
-            }
-            for (int i = 0; i < breite.length && i < this.getColumnCount(); ++i) {
-                if (breite[i] == 0) {
-                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMinWidth(0);
-                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setPreferredWidth(0);
-                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMaxWidth(0);
-                } else {
-                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMinWidth(10);
-                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setMaxWidth(3000);
-                    this.getColumnModel().getColumn(this.convertColumnIndexToView(i)).setPreferredWidth(breite[i]);
-                }
-            }
+            setSpaltenBreiten();
             for (int i = 0; i < reihe.length && i < this.getColumnCount(); ++i) {
                 this.getColumnModel().moveColumn(this.convertColumnIndexToView(reihe[i]), i);
             }
@@ -594,16 +568,16 @@ public final class MVTable extends JTable {
 
     private void resetFilmeTab(int i) {
         reihe[i] = i;
-        breite[i] = 200;
-        switch (ColumnManagerFactory.getInstance().getFilmColumnById(i)) {
+        FilmColumns col = ColumnManagerFactory.getInstance().getFilmColumnById(i);
+        switch (col) {
             case NR:
-                breite[i] = 75;
+                breiten.put(col,50);
                 break;
             case TITEL:
-                breite[i] = 300;
+                breiten.put(col,300);
                 break;
             case BESCHREIBUNG:
-                breite[i] = 400;
+                breiten.put(col,400);
                 break;
             case DATUM:
             case ZEIT:
@@ -611,75 +585,84 @@ public final class MVTable extends JTable {
             case GROESSE:
             case DAUER:
             case GEO:
-                breite[i] = 100;
+                breiten.put(col,100);
                 break;
             case URL:
-                breite[i] = 500;
+                breiten.put(col,500);
                 break;
             case FILM_ABSPIELEN:
             case FILM_AUFZEICHNEN:
             case HD:
             case UT:
-                breite[i] = 50;
+                breiten.put(col,50);
                 break;
             default:
+                breiten.put(col,200);
                 break;
         }
     }
 
     private void resetDownloadsTab(int i) {
         reihe[i] = i;
-        breite[i] = 200;
-        switch (i) {
-            case DatenDownload.DOWNLOAD_NR:
-            case DatenDownload.DOWNLOAD_FILM_NR:
-                breite[i] = 75;
+        DownloadColumns col = ColumnManagerFactory.getInstance().getDownloadColumnById(i);
+        switch (col) {
+            case NR:
+            case FILMNR:
+                breiten.put(col,75);
                 break;
-            case DatenDownload.DOWNLOAD_BUTTON_START:
-            case DatenDownload.DOWNLOAD_BUTTON_DEL:
-            case DatenDownload.DOWNLOAD_PROGRAMM_RESTART:
-            case DatenDownload.DOWNLOAD_PROGRAMM_DOWNLOADMANAGER:
-            case DatenDownload.DOWNLOAD_UNTERBROCHEN:
-            case DatenDownload.DOWNLOAD_SPOTLIGHT:
-            case DatenDownload.DOWNLOAD_SUBTITLE:
-            case DatenDownload.DOWNLOAD_INFODATEI:
-            case DatenDownload.DOWNLOAD_HD:
-            case DatenDownload.DOWNLOAD_UT:
-                breite[i] = 50;
+            case BUTTON_START:
+            case BUTTON_DEL:
+            case RESTART:
+            case REMOTE_DOWNLOAD:
+            case PAUSE:
+            case SPOTLIGHT:
+            case UNTERTITEL:
+            case INFODATEI:
+            case HD:
+            case UT:
+                breiten.put(col,50);
                 break;
-            case DatenDownload.DOWNLOAD_TITEL:
-                breite[i] = 250;
+            case TITEL:
+                breiten.put(col,250);
                 break;
-            case DatenDownload.DOWNLOAD_ABO:
-            case DatenDownload.DOWNLOAD_THEMA:
-                breite[i] = 150;
+            case ABO:
+            case THEMA:
+                breiten.put(col,150);
                 break;
-            case DatenDownload.DOWNLOAD_DATUM:
-            case DatenDownload.DOWNLOAD_ZEIT:
-            case DatenDownload.DOWNLOAD_GROESSE:
-            case DatenDownload.DOWNLOAD_BANDBREITE:
-            case DatenDownload.DOWNLOAD_SENDER:
-            case DatenDownload.DOWNLOAD_PROGRESS:
-            case DatenDownload.DOWNLOAD_RESTZEIT:
-            case DatenDownload.DOWNLOAD_DAUER:
-            case DatenDownload.DOWNLOAD_GEO:
-                breite[i] = 100;
+            case DATUM:
+            case ZEIT:
+            case GROESSE:
+            case GESCHWINDIGKEIT:
+            case SENDER:
+            case FORTSCHRITT:
+            case RESTZEIT:
+            case DAUER:
+            case GEO:
+                breiten.put(col,100);
                 break;
             default:
+                breiten.put(col,200);
                 break;
         }
     }
 
     private void resetAbosTab(int i) {
         reihe[i] = i;
-        breite[i] = 200;
-        if (i == DatenAbo.ABO_NR
-                || i == DatenAbo.ABO_EINGESCHALTET
-                || i == DatenAbo.ABO_MIN) {
-            breite[i] = 75;
-        } else if (i == DatenAbo.ABO_DOWN_DATUM
-                || i == DatenAbo.ABO_SENDER) {
-            breite[i] = 100;
+        AboColumns col = ColumnManagerFactory.getInstance().getAboColumnById(i);
+        switch (col)
+        {
+            case NR:
+            case AKTIV:
+            case MIN_MAX:
+                breiten.put(col,75);
+                break;
+            case LETZTES_ABO:
+            case SENDER:
+                breiten.put(col,100);
+                break;
+                default:
+                    breiten.put(col,200);
+                    break;
         }
     }
 
@@ -698,7 +681,8 @@ public final class MVTable extends JTable {
                     break;
                 case MEDIA_DB:
                     reihe[i] = i;
-                    breite[i] = 200;
+                    MediaDbColumns col = ColumnManagerFactory.getInstance().getMediaDbColumnById(i);
+                    breiten.put(col,200);
                     break;
             }
         }
@@ -706,80 +690,8 @@ public final class MVTable extends JTable {
         this.getRowSorter().setSortKeys(null);
         this.setRowSorter(null);
         this.setAutoCreateRowSorter(true);
-        spaltenAusschalten();
-        setSpaltenEinAus(breite, spaltenAnzeigen);
         setSpalten();
         setHeight();
-    }
-
-    private void spaltenAusschaltenFilme(int i) {
-        if (i == FilmColumns.BESCHREIBUNG.getId()
-                || i == FilmColumns.WEBSEITE.getId()
-                || i == DatenFilm.FILM_NEU
-                || i == DatenFilm.FILM_URL_RTMP
-                || i == DatenFilm.FILM_URL_AUTH
-                || i == DatenFilm.FILM_URL_HD
-                || i == DatenFilm.FILM_URL_RTMP_HD
-                || i == DatenFilm.FILM_URL_KLEIN
-                || i == DatenFilm.FILM_URL_RTMP_KLEIN
-                || i == DatenFilm.FILM_DATUM_LONG
-                || i == DatenFilm.FILM_URL_HISTORY
-                || i == DatenFilm.FILM_URL_SUBTITLE
-                || i == DatenFilm.FILM_REF) {
-            breite[i] = 0;
-        }
-    }
-
-    private void spaltenAusschaltenDownloads(int i) {
-        if (i == DatenDownload.DOWNLOAD_FILM_URL
-                || i == DatenDownload.DOWNLOAD_URL_RTMP
-                || i == DatenDownload.DOWNLOAD_URL_SUBTITLE
-                || i == DatenDownload.DOWNLOAD_PROGRAMM
-                || i == DatenDownload.DOWNLOAD_PROGRAMM_AUFRUF
-                || i == DatenDownload.DOWNLOAD_PROGRAMM_AUFRUF_ARRAY
-                || i == DatenDownload.DOWNLOAD_PROGRAMM_RESTART
-                || i == DatenDownload.DOWNLOAD_PROGRAMM_DOWNLOADMANAGER
-                || i == DatenDownload.DOWNLOAD_ZIEL_DATEINAME
-                || i == DatenDownload.DOWNLOAD_ZIEL_PFAD
-                || i == DatenDownload.DOWNLOAD_ART
-                || i == DatenDownload.DOWNLOAD_QUELLE
-                || i == DatenDownload.DOWNLOAD_ZURUECKGESTELLT
-                || i == DatenDownload.DOWNLOAD_HISTORY_URL
-                || i == DatenDownload.DOWNLOAD_REF
-                || i == DatenDownload.DOWNLOAD_SPOTLIGHT
-                || i == DatenDownload.DOWNLOAD_INFODATEI
-                || i == DatenDownload.DOWNLOAD_SUBTITLE
-                || i == DatenDownload.DOWNLOAD_UNTERBROCHEN) {
-            breite[i] = 0;
-        }
-    }
-
-    private void spaltenAusschaltenAbos(int i) {
-        if (i == DatenAbo.ABO_ZIELPFAD
-                || i == DatenAbo.ABO_PSET
-                || i == DatenAbo.ABO_MINDESTDAUER
-                || i == DatenAbo.ABO_MIN
-                || i == DatenAbo.ABO_DOWN_DATUM) {
-            breite[i] = 0;
-        }
-    }
-
-    private void spaltenAusschalten() {
-        for (int i = 0; i < maxSpalten; ++i) {
-            switch (tabelle) {
-                case FILME:
-                    spaltenAusschaltenFilme(i);
-                    break;
-                case DOWNLOADS:
-                    spaltenAusschaltenDownloads(i);
-                    break;
-                case ABOS:
-                    spaltenAusschaltenAbos(i);
-                    break;
-                case STANDARD:
-                    break;
-            }
-        }
     }
 
     public void tabelleNachDatenSchreiben() {
@@ -800,7 +712,7 @@ public final class MVTable extends JTable {
         }
         b = Integer.toString(breite_[0]);
         r = Integer.toString(reihe_[0]);
-        for (int i = 1; i < breite.length; i++) {
+        for (int i = 1; i < breiten.size(); i++) {
             b = b + ',' + Integer.toString(breite_[i]);
             r = r + ',' + Integer.toString(reihe_[i]);
         }

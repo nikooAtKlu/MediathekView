@@ -50,15 +50,13 @@ import mediathek.gui.dialogEinstellungen.PanelFilmlisten;
 public class GuiDebug extends JPanel {
 
     private final JButton[] buttonSender;
-    private final String[] sender;
     private final Daten daten;
 
     public GuiDebug(Daten d) {
         super();
         initComponents();
         daten = d;
-        //sender = daten.getFilmeLaden().getSenderNamen();
-        buttonSender = new JButton[sender.length];
+        buttonSender = new JButton[Sender.values().length];
 
         jPanelFilmlisteLaden.setLayout(new GridLayout(1, 1));
         jPanelFilmlisteLaden.add(new PanelFilmlisten(d, daten.getMediathekGui()));
@@ -173,10 +171,10 @@ public class GuiDebug extends JPanel {
         jButtonHashOlddoppelt.addActionListener(e
                 -> {
             ListeFilme listeFilme = new ListeFilme();
-            HashSet<String> hash = new HashSet<>();
-            HashSet<String> hashDoppelt = new HashSet<>();
+            HashSet<Integer> hash = new HashSet<>();
+            HashSet<Integer> hashDoppelt = new HashSet<>();
             for (Film film : daten.getListeFilme()) {
-                String tt = film.getIndexAddOld();
+                int tt = film.hashCode();
                 if (hash.contains(tt)) {
                     hashDoppelt.add(tt);
                 } else {
@@ -185,7 +183,7 @@ public class GuiDebug extends JPanel {
             }
             hash.clear();
             for (Film film : daten.getListeFilme()) {
-                String tt = film.getIndexAddOld();
+                int tt = film.hashCode();
                 if (hashDoppelt.contains(tt)) {
                     listeFilme.add(film);
                 }
@@ -297,7 +295,7 @@ public class GuiDebug extends JPanel {
         jPanelLoeschen.removeAll();
         jPanelLoeschen.setLayout(new GridLayout(0, 5));
         int nr = 0;
-        for (String aSender : sender) {
+        for (String aSender : Sender.getSenderNamen()) {
             JButton btn = buttonSender[nr];
             btn.setText(aSender);
             jPanelLoeschen.add(btn);

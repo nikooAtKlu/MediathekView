@@ -30,7 +30,6 @@ public class DatenMediaDB extends MVData<DatenMediaDB> {
     public final static int MEDIA_DB_EXTERN = 3;
 
     public final static int MAX_ELEM = 4;
-    public final static String[] COLUMN_NAMES = {"Name", "Pfad", "Größe [MB]", "Extern"};
     public final static String[] XML_NAMES = {"Name", "Pfad", "Groesse", "Extern"};
 
     public String[] arr;

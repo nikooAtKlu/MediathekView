@@ -103,11 +103,11 @@ public class CellRendererFilme extends DefaultTableCellRenderer {
 
             if (((MVTable) table).lineBreak) {
                 JTextArea textArea;
-                switch (columnModelIndex) {
-                	case FilmColumns.BESCHREIBUNG.getId():
-                    case FilmColumns.THEMA.getId():
-                    case FilmColumns.TITEL.getId():
-                    case FilmColumns.URL.getId():
+                switch (ColumnManagerFactory.getInstance().getFilmColumnById(columnModelIndex)) {
+                	case BESCHREIBUNG:
+                    case THEMA:
+                    case TITEL:
+                    case URL:
                         textArea = new JTextArea();
                         textArea.setLineWrap(true);
                         textArea.setWrapStyleWord(true);
@@ -157,7 +157,7 @@ public class CellRendererFilme extends DefaultTableCellRenderer {
                         handleSenderColumn((String) value, ((MVTable) table).iconKlein);
                     }
                     break;
-                case DatenFilm.FILM_NEU:
+                case NEU:
                     setHorizontalAlignment(SwingConstants.CENTER);
                     if (datenFilm.isNeu()) {
                         setIcon(ja_16);

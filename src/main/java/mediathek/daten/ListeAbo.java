@@ -38,35 +38,42 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 @SuppressWarnings("serial")
-public class ListeAbo extends LinkedList<DatenAbo> {
+public class ListeAbo extends LinkedList<DatenAbo>
+{
     private static final Logger LOG = LogManager.getLogger(ListeAbo.class);
     private final Daten daten;
-    private final Map<Integer,DatenAbo> aboMap;
+    private final Map<Integer, DatenAbo> aboMap;
     private static final String[] LEER = {""};
 
-    public ListeAbo(Daten ddaten) {
+    public ListeAbo(Daten ddaten)
+    {
         daten = ddaten;
         aboMap = new HashMap<>();
     }
 
     private int nr;
 
-    public boolean addAbo(String aboName) {
+    public boolean addAbo(String aboName)
+    {
         return addAbo(aboName, "", "", "");
     }
 
-    public boolean addAbo(String aboname, String filmSender, String filmThema, String filmTitel) {
+    public boolean addAbo(String aboname, String filmSender, String filmThema, String filmTitel)
+    {
         int min;
-        try {
+        try
+        {
             min = Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ABO_MIN_SIZE));
-        } catch (Exception ex) {
+        } catch (Exception ex)
+        {
             min = 0;
             MVConfig.add(MVConfig.Configs.SYSTEM_ABO_MIN_SIZE, "0");
         }
         return addAbo(filmSender, filmThema, filmTitel, "", "", min, true/*min*/, aboname);
     }
 
-    public boolean addAbo(String filmSender, String filmThema, String filmTitel, String filmThemaTitel, String irgendwo, int mindestdauer, boolean min, String namePfad) {
+    public boolean addAbo(String filmSender, String filmThema, String filmTitel, String filmThemaTitel, String irgendwo, int mindestdauer, boolean min, String namePfad)
+    {
         //abo anlegen, oder false wenns schon existiert
         boolean ret = false;
         namePfad = FilenameUtils.replaceLeerDateiname(namePfad, false /*nur ein Ordner*/,
@@ -75,31 +82,37 @@ public class ListeAbo extends LinkedList<DatenAbo> {
         DatenAbo datenAbo = new DatenAbo(namePfad /* name */, filmSender, filmThema, filmTitel, filmThemaTitel, irgendwo, mindestdauer, min, namePfad, "");
         DialogEditAbo dialogEditAbo = new DialogEditAbo(Daten.getInstance().getMediathekGui(), true, daten, datenAbo, false /*onlyOne*/);
         dialogEditAbo.setVisible(true);
-        if (dialogEditAbo.ok) {
-            if (!aboExistiertBereits(datenAbo)) {
+        if (dialogEditAbo.ok)
+        {
+            if (!aboExistiertBereits(datenAbo))
+            {
                 MVConfig.add(MVConfig.Configs.SYSTEM_ABO_MIN_SIZE, datenAbo.arr[DatenAbo.ABO_MINDESTDAUER]); // als Vorgabe merken
                 addAbo(datenAbo);
                 aenderungMelden();
                 sort();
                 ret = true;
-            } else {
+            } else
+            {
                 MVMessageDialog.showMessageDialog(null, "Abo existiert bereits", "Abo anlegen", JOptionPane.INFORMATION_MESSAGE);
             }
         }
         return ret;
     }
 
-    public void addAbo(DatenAbo datenAbo) {
+    public void addAbo(DatenAbo datenAbo)
+    {
         // die Änderung an der Liste wird nicht gemeldet!!
         // für das Lesen der Konfig-Datei beim Programmstart
         ++nr;
         datenAbo.nr = nr;
-        if (datenAbo.arr[DatenAbo.ABO_NAME].isEmpty()) {
+        if (datenAbo.arr[DatenAbo.ABO_NAME].isEmpty())
+        {
             // Downloads ohne "Aboname" sind manuelle Downloads
             datenAbo.arr[DatenAbo.ABO_NAME] = "Abo_" + nr;
         }
         datenAbo.setMindestDauerMinuten();
-        if (datenAbo.arr[DatenAbo.ABO_MIN].isEmpty()) {
+        if (datenAbo.arr[DatenAbo.ABO_MIN].isEmpty())
+        {
             //zum Erhalt der alten Funktionalität
             datenAbo.arr[DatenAbo.ABO_MIN] = Boolean.TRUE.toString();
         }
@@ -107,75 +120,102 @@ public class ListeAbo extends LinkedList<DatenAbo> {
         super.add(datenAbo);
     }
 
-    public void aboLoeschen(DatenAbo abo) {
-        if (abo != null) {
+    public void aboLoeschen(DatenAbo abo)
+    {
+        if (abo != null)
+        {
             this.remove(abo);
             aenderungMelden();
         }
     }
 
-    public void aenderungMelden() {
+    public void aenderungMelden()
+    {
         // Filmliste anpassen
         setAboFuerFilm(Daten.getInstance().getListeFilme(), true /*aboLoeschen*/);
         Listener.notify(Listener.EREIGNIS_LISTE_ABOS, ListeAbo.class.getSimpleName());
     }
 
-    public DatenAbo getAboNr(int i) {
+    public DatenAbo getAboNr(int i)
+    {
         return this.get(i);
     }
 
-    public void sort() {
+    public void sort()
+    {
         Collections.sort(this);
     }
 
-    public void addObjectData(TModelAbo model, String sender) {
+    public void addObjectData(TModelAbo model, String sender)
+    {
         model.setRowCount(0);
         Object[] object = new Object[DatenAbo.MAX_ELEM];
-        for (DatenAbo datenAbo : this) {
-            if (sender.isEmpty() || sender.equals(datenAbo.arr[DatenAbo.ABO_SENDER])) {
-                for (int m = 0; m < DatenAbo.MAX_ELEM; ++m) {
-                    if (m == DatenAbo.ABO_NR) {
-                        object[m] = datenAbo.nr;
-                    } else if (m == DatenAbo.ABO_MINDESTDAUER) {
-                        object[m] = datenAbo.mindestdauerMinuten;
-                    } else if (m == DatenAbo.ABO_DOWN_DATUM) {
-                        object[m] = getDatumForObject(datenAbo.arr[DatenAbo.ABO_DOWN_DATUM]);
-                    } else if (m == DatenAbo.ABO_EINGESCHALTET) {
-                        object[m] = ""; //Boolean.valueOf(datenAbo.aboIstEingeschaltet());
-                    } else if (m == DatenAbo.ABO_MIN) {
-                        object[m] = datenAbo.min ? "min" : "max";
-                    } else if (m != DatenAbo.ABO_NAME && !DatenAbo.anzeigen(m)) {
-                        // Name immer füllen, egal ob angezeigt
-                        object[m] = "";
-                    } else {
-                        object[m] = datenAbo.arr[m];
+        for (DatenAbo datenAbo : this)
+        {
+            if (sender.isEmpty() || sender.equals(datenAbo.arr[AboColumns.SENDER.getId()]))
+            {
+                for (AboColumns col : AboColumns.values())
+                {
+                    switch (col)
+                    {
+                        case NR:
+                            object[col.getId()] = datenAbo.nr;
+                        case DAUER:
+                            object[col.getId()] = datenAbo.mindestdauerMinuten;
+                        case LETZTES_ABO:
+                            object[col.getId()] = getDatumForObject(datenAbo.arr[DatenAbo.ABO_DOWN_DATUM]);
+                        case AKTIV:
+                            object[col.getId()] = Boolean.valueOf(datenAbo.aboIstEingeschaltet());
+                        case MIN_MAX:
+                            object[col.getId()] = datenAbo.min ? "min" : "max";
+                        case NAME:
+                            if (!DatenAbo.anzeigen(col.getId()))
+                            {
+                                object[col.getId()] = "";
+                            } else
+                            {
+                                final int id = col.getId();
+                                object[id] = datenAbo.arr[id];
+                            }
+                            break;
+                        default:
+                            final int id = col.getId();
+                            object[id] = datenAbo.arr[id];
+                            break;
                     }
                 }
-                model.addRow(object);
             }
+            model.addRow(object);
         }
     }
 
-    public LocalDateTime getDatumForObject(String datum) {
+    public LocalDateTime getDatumForObject(String datum)
+    {
         if (datum.isEmpty())
         {
             return LocalDateTime.now();
-        }else {
-            try {
-                return LocalDateTime.parse(datum,FormatterUtil.FORMATTER_ddMMyyyy);
-            } catch (DateTimeParseException dateTimeParseException) {
-                LOG.debug(String.format("Das Datum für ein Abo-Objekt konnte nicht geparsed werden: \"%s\"",datum));
+        } else
+        {
+            try
+            {
+                return LocalDateTime.parse(datum, FormatterUtil.FORMATTER_ddMMyyyy);
+            } catch (DateTimeParseException dateTimeParseException)
+            {
+                LOG.debug(String.format("Das Datum für ein Abo-Objekt konnte nicht geparsed werden: \"%s\"", datum));
                 return LocalDateTime.now();
             }
         }
     }
 
-    public ArrayList<String> getPfade() {
+    public ArrayList<String> getPfade()
+    {
         // liefert eine Array mit allen Pfaden
         ArrayList<String> pfade = new ArrayList<>();
-        for (DatenAbo abo : this) {
+        for (DatenAbo abo : this)
+        {
             String s = abo.arr[DatenAbo.ABO_ZIELPFAD];
-            if (!pfade.contains(s)) {
+            if (!pfade.contains(s))
+            {
                 pfade.add(abo.arr[DatenAbo.ABO_ZIELPFAD]);
             }
         }
@@ -184,53 +224,69 @@ public class ListeAbo extends LinkedList<DatenAbo> {
         return pfade;
     }
 
-    private boolean aboExistiertBereits(DatenAbo abo) {
+    private boolean aboExistiertBereits(DatenAbo abo)
+    {
         // true wenn es das Abo schon gibt
-        for (DatenAbo datenAbo : this) {
-            if (Filter.aboExistiertBereits(datenAbo, abo)) {
+        for (DatenAbo datenAbo : this)
+        {
+            if (Filter.aboExistiertBereits(datenAbo, abo))
+            {
                 return true;
             }
         }
         return false;
     }
 
-    public DatenAbo getAboFuerFilm_schnell(Film film, boolean laengePruefen) {
+    public DatenAbo getAboFuerFilm_schnell(Film film, boolean laengePruefen)
+    {
         // da wird nur in der Filmliste geschaut, ob in "DatenFilm" ein Abo eingetragen ist
         // geht schneller, "getAboFuerFilm" muss aber vorher schon gelaufen sein!!
-        if (aboMap.containsKey(film.hashCode())) {
+        if (aboMap.containsKey(film.hashCode()))
+        {
             final DatenAbo abo = aboMap.get(film.hashCode());
-            if (laengePruefen) {
-                if (!Filter.laengePruefen(abo.mindestdauerMinuten, film.getDuration().getSeconds(), abo.min)) {
+            if (laengePruefen)
+            {
+                if (!Filter.laengePruefen(abo.mindestdauerMinuten, film.getDuration().getSeconds(), abo.min))
+                {
                     return null;
                 }
             }
             return abo;
-        } else {
+        } else
+        {
             return null;
         }
     }
 
-    private void deleteAboInFilm(Film aFilm) {
+    private void deleteAboInFilm(Film aFilm)
+    {
         // für jeden Film Abo löschen
         aboMap.remove(aFilm.hashCode());
     }
 
-    private void createAbo(DatenAbo abo) {
-        if (abo.arr[DatenAbo.ABO_TITEL].isEmpty()) {
+    private void createAbo(DatenAbo abo)
+    {
+        if (abo.arr[DatenAbo.ABO_TITEL].isEmpty())
+        {
             abo.titel = LEER;
-        } else {
+        } else
+        {
             abo.titel = Filter.isPattern(abo.arr[DatenAbo.ABO_TITEL])
                     ? new String[]{abo.arr[DatenAbo.ABO_TITEL]} : abo.arr[DatenAbo.ABO_TITEL].toLowerCase().split(",");
         }
-        if (abo.arr[DatenAbo.ABO_THEMA_TITEL].isEmpty()) {
+        if (abo.arr[DatenAbo.ABO_THEMA_TITEL].isEmpty())
+        {
             abo.thema = LEER;
-        } else {
+        } else
+        {
             abo.thema = Filter.isPattern(abo.arr[DatenAbo.ABO_THEMA_TITEL])
                     ? new String[]{abo.arr[DatenAbo.ABO_THEMA_TITEL]} : abo.arr[DatenAbo.ABO_THEMA_TITEL].toLowerCase().split(",");
         }
-        if (abo.arr[DatenAbo.ABO_IRGENDWO].isEmpty()) {
+        if (abo.arr[DatenAbo.ABO_IRGENDWO].isEmpty())
+        {
             abo.irgendwo = LEER;
-        } else {
+        } else
+        {
             abo.irgendwo = Filter.isPattern(abo.arr[DatenAbo.ABO_IRGENDWO])
                     ? new String[]{abo.arr[DatenAbo.ABO_IRGENDWO]} : abo.arr[DatenAbo.ABO_IRGENDWO].toLowerCase().split(",");
         }
@@ -242,7 +298,8 @@ public class ListeAbo extends LinkedList<DatenAbo> {
      *
      * @param film assignee
      */
-    private void assignAboToFilm(Film film) {
+    private void assignAboToFilm(Film film)
+    {
         final DatenAbo foundAbo = this.stream().filter(abo
                 -> Filter.filterAufFilmPruefen(abo.arr[DatenAbo.ABO_SENDER], abo.arr[DatenAbo.ABO_THEMA],
                 abo.titel,
@@ -252,8 +309,9 @@ public class ListeAbo extends LinkedList<DatenAbo> {
                 abo.min,
                 film, false)).findFirst().orElse(null);
 
-        if (foundAbo != null) {
-            aboMap.put(film.hashCode(),foundAbo);
+        if (foundAbo != null)
+        {
+            aboMap.put(film.hashCode(), foundAbo);
             /*if (!Filter.laengePruefen(foundAbo.mindestdauerMinuten, film.getDuration().getSeconds(), foundAbo.min)) {
                 // dann ist der Film zu kurz
                 aboMap.put(film.hashCode(),foundAbo);
@@ -261,18 +319,21 @@ public class ListeAbo extends LinkedList<DatenAbo> {
                 film.abo = foundAbo;
             }*/
             //Nicklas2721: Konnte keine Stelle finden an der "FILM_ABO_NAME" angezeigt wird => Information wird nicht mehr verwendet.
-        } else {
+        } else
+        {
             deleteAboInFilm(film);
         }
     }
 
-    public void setAboFuerFilm(ListeFilme listeFilme, boolean aboLoeschen) {
+    public void setAboFuerFilm(ListeFilme listeFilme, boolean aboLoeschen)
+    {
         // hier wird tatsächlich für jeden Film die Liste der Abos durchsucht
         // braucht länger
 
         Duration.counterStart("Abo in Filmliste eintragen");
 
-        if (this.isEmpty() && aboLoeschen) {
+        if (this.isEmpty() && aboLoeschen)
+        {
             listeFilme.parallelStream().forEach(this::deleteAboInFilm);
             return;
         }
@@ -287,7 +348,8 @@ public class ListeAbo extends LinkedList<DatenAbo> {
         listeFilme.parallelStream().forEach(this::assignAboToFilm);
 
         // und jetzt wieder löschen
-        forEach(datenAbo -> {
+        forEach(datenAbo ->
+        {
             datenAbo.titel = LEER;
             datenAbo.thema = LEER;
             datenAbo.irgendwo = LEER;
