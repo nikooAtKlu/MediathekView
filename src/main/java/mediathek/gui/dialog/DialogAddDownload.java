@@ -19,26 +19,9 @@
  */
 package mediathek.gui.dialog;
 
-import com.jidesoft.utils.SystemInfo;
-import de.mediathekview.mlib.daten.Film;
-import de.mediathekview.mlib.daten.Qualities;
-import de.mediathekview.mlib.tool.FilenameUtils;
-import de.mediathekview.mlib.tool.Listener;
-import de.mediathekview.mlib.tool.Log;
-import mediathek.config.*;
-import mediathek.daten.DatenDownload;
-import mediathek.daten.DatenPset;
-import mediathek.tool.EscBeenden;
-import mediathek.tool.GuiFunktionenProgramme;
-import mediathek.tool.MVFilmSize;
-import mediathek.tool.MVMessageDialog;
-
-import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.JTextComponent;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.FileDialog;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -47,6 +30,35 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
+
+import com.jidesoft.utils.SystemInfo;
+
+import de.mediathekview.mlib.daten.Film;
+import de.mediathekview.mlib.daten.Qualities;
+import de.mediathekview.mlib.tool.FilenameUtils;
+import de.mediathekview.mlib.tool.Listener;
+import de.mediathekview.mlib.tool.Log;
+import mediathek.config.Daten;
+import mediathek.config.Icons;
+import mediathek.config.Konstanten;
+import mediathek.config.MVColor;
+import mediathek.config.MVConfig;
+import mediathek.daten.DatenDownload;
+import mediathek.daten.DatenPset;
+import mediathek.tool.EscBeenden;
+import mediathek.tool.GuiFunktionenProgramme;
+import mediathek.tool.MVFilmSize;
+import mediathek.tool.MVMessageDialog;
 
 @SuppressWarnings("serial")
 public class DialogAddDownload extends JDialog {
@@ -391,13 +403,13 @@ public class DialogAddDownload extends JDialog {
      *
      * @return The resolution as a string.
      */
-    private String getFilmResolution() {
+    private Qualities getFilmResolution() {
         if (jRadioButtonAufloesungHd.isSelected()) {
-            return Qualities.HD.name();
+            return Qualities.HD;
         } else if (jRadioButtonAufloesungKlein.isSelected()) {
-            return Qualities.SMALL.name();
+            return Qualities.SMALL;
         } else {
-            return Qualities.NORMAL.name();
+            return Qualities.NORMAL;
         }
     }
 

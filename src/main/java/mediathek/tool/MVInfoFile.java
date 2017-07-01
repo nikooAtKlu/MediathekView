@@ -31,6 +31,7 @@ import java.nio.file.Paths;
 import javax.swing.JFrame;
 
 import de.mediathekview.mlib.daten.Film;
+import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.FilenameUtils;
 import de.mediathekview.mlib.tool.Log;
 import de.mediathekview.mlib.tool.SysMsg;
@@ -38,13 +39,16 @@ import mediathek.config.Daten;
 import mediathek.config.MVConfig;
 import mediathek.daten.DatenDownload;
 import mediathek.daten.DatenPset;
+import mediathek.daten.FilmColumns;
 import mediathek.daten.ListePset;
 import mediathek.gui.dialog.DialogZiel;
 
 public class MVInfoFile {
+	
+	private static final String INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE = ":      ";
 
     public static void writeInfoFile(JFrame paFrame, Daten daten, Film film) {
-        String titel = film.arr[DatenFilm.FILM_TITEL];
+        String titel = film.getTitel();
         titel = FilenameUtils.replaceLeerDateiname(titel, false /*pfad*/,
                 Boolean.parseBoolean(MVConfig.get(MVConfig.Configs.SYSTEM_USE_REPLACETABLE)),
                 Boolean.parseBoolean(MVConfig.get(MVConfig.Configs.SYSTEM_ONLY_ASCII)));
@@ -58,7 +62,7 @@ public class MVInfoFile {
             pfad = GuiFunktionen.getStandardDownloadPath();
         }
         if (titel.isEmpty()) {
-            titel = film.arr[DatenFilm.FILM_SENDER].replace(" ", "-") + ".txt";
+            titel = film.getSender().getName().replace(" ", "-") + ".txt";
         } else {
             titel = titel + ".txt";
         }
@@ -70,37 +74,33 @@ public class MVInfoFile {
         }
 
         Path path = Paths.get(dialog.ziel);
+        
         try (BufferedWriter br = new BufferedWriter(new OutputStreamWriter(new DataOutputStream(Files.newOutputStream(path))))) {
-            br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_SENDER] + ":      " + film.arr[DatenFilm.FILM_SENDER]);
+            br.write(FilmColumns.SENDER + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + film.getSender().getName());
             br.write("\n");
-            br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_THEMA] + ":       " + film.arr[DatenFilm.FILM_THEMA]);
+            br.write(FilmColumns.THEMA + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + film.getThema());
             br.write("\n\n");
-            br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_TITEL] + ":       " + film.arr[DatenFilm.FILM_TITEL]);
+            br.write(FilmColumns.TITEL + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + film.getTitel());
             br.write("\n\n");
-            br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_DATUM] + ":       " + film.arr[DatenFilm.FILM_DATUM]);
+            br.write(FilmColumns.DATUM + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + film.getTime().format(FormatterUtil.FORMATTER_ddMMyyyy));
             br.write("\n");
-            br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_ZEIT] + ":        " + film.arr[DatenFilm.FILM_ZEIT]);
+            br.write(FilmColumns.ZEIT + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + film.getTime().format(FormatterUtil.FORMATTER_HHmmss));
             br.write("\n");
-            br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_DAUER] + ":       " + film.arr[DatenFilm.FILM_DAUER]);
+            br.write(FilmColumns.DAUER + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + film.getDuration());
             br.write("\n");
-            br.write(DatenDownload.COLUMN_NAMES[DatenDownload.DOWNLOAD_GROESSE] + ":  " + film.arr[DatenFilm.FILM_GROESSE]);
+            br.write(FilmColumns.GROESSE + ":  " + film.getFileSize(Qualities.NORMAL));
             br.write("\n\n");
 
-            br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_WEBSEITE] + '\n');
-            br.write(film.arr[DatenFilm.FILM_WEBSEITE]);
+            br.write(FilmColumns.WEBSEITE + "\n");
+            br.write(film.getWebsite().toString());
             br.write("\n\n");
 
-            br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_URL] + '\n');
-            br.write(film.arr[DatenFilm.FILM_URL]);
+            br.write(FilmColumns.URL + "\n");
+            br.write(film.getUrl(Qualities.NORMAL).toString());
             br.write("\n\n");
-            if (!film.arr[DatenFilm.FILM_URL_RTMP].isEmpty()) {
-                br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_URL_RTMP] + '\n');
-                br.write(film.arr[DatenFilm.FILM_URL_RTMP]);
-                br.write("\n\n");
-            }
 
             int anz = 0;
-            for (String s : film.arr[DatenFilm.FILM_BESCHREIBUNG].split(" ")) {
+            for (String s : film.getBeschreibung().split(" ")) {
                 anz += s.length();
                 br.write(s + ' ');
                 if (anz > 50) {
@@ -124,23 +124,23 @@ public class MVInfoFile {
              OutputStreamWriter osw = new OutputStreamWriter(dos);
              BufferedWriter br = new BufferedWriter(osw)) {
             if (datenDownload.film != null) {
-                br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_SENDER] + ":      " + datenDownload.film.arr[DatenFilm.FILM_SENDER]);
+                br.write(FilmColumns.SENDER + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + datenDownload.film.getSender());
                 br.write("\n");
-                br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_THEMA] + ":       " + datenDownload.film.arr[DatenFilm.FILM_THEMA]);
+                br.write(FilmColumns.THEMA + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + datenDownload.film.getThema());
                 br.write("\n\n");
-                br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_TITEL] + ":       " + datenDownload.film.arr[DatenFilm.FILM_TITEL]);
+                br.write(FilmColumns.TITEL + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + datenDownload.film.getTitel());
                 br.write("\n\n");
-                br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_DATUM] + ":       " + datenDownload.film.arr[DatenFilm.FILM_DATUM]);
+                br.write(FilmColumns.DATUM + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + datenDownload.film.getTime().format(FormatterUtil.FORMATTER_ddMMyyyy));
                 br.write("\n");
-                br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_ZEIT] + ":        " + datenDownload.film.arr[DatenFilm.FILM_ZEIT]);
+                br.write(FilmColumns.ZEIT + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + datenDownload.film.getTime().format(FormatterUtil.FORMATTER_HHmmss));
                 br.write("\n");
-                br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_DAUER] + ":       " + datenDownload.film.arr[DatenFilm.FILM_DAUER]);
+                br.write(FilmColumns.DAUER + INFOFILE_KEY_VALUE_TRENNZEICHENKETTTE + datenDownload.film.getDuration());
                 br.write("\n");
                 br.write(DatenDownload.COLUMN_NAMES[DatenDownload.DOWNLOAD_GROESSE] + ":  " + datenDownload.mVFilmSize);
                 br.write("\n\n");
 
-                br.write(DatenFilm.COLUMN_NAMES[DatenFilm.FILM_WEBSEITE] + '\n');
-                br.write(datenDownload.film.arr[DatenFilm.FILM_WEBSEITE]);
+                br.write(FilmColumns.WEBSEITE + "\n");
+                br.write(datenDownload.film.getWebsite().toString());
                 br.write("\n\n");
             }
 
@@ -156,7 +156,7 @@ public class MVInfoFile {
 
             if (datenDownload.film != null) {
                 int anz = 0;
-                for (String s : datenDownload.film.arr[DatenFilm.FILM_BESCHREIBUNG].split(" ")) {
+                for (String s : datenDownload.film.getBeschreibung().split(" ")) {
                     anz += s.length();
                     br.write(s + ' ');
                     if (anz > 50) {

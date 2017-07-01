@@ -46,7 +46,7 @@ public class SpotlightCommentWriter {
         final Path filmPath = Paths.get(datenDownload.arr[DatenDownload.DOWNLOAD_ZIEL_PFAD_DATEINAME]);
         if (Files.exists(filmPath)) {
             final String strFilePath = filmPath.toString();
-            String strComment = datenDownload.film.arr[DatenFilm.FILM_BESCHREIBUNG];
+            String strComment = datenDownload.film.getBeschreibung();
             if (strComment != null) {
                 //no need to write spotlight data when there is no description...
                 if (strComment.isEmpty()) {

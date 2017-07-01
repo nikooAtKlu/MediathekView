@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 
 import mediathek.config.Daten;
 import mediathek.daten.DatenDownload;
+import mediathek.daten.FilmColumns;
 import mediathek.tool.TModel;
 
 @SuppressWarnings("serial")
@@ -59,7 +60,9 @@ public class PanelInfoStarts extends JPanel {
     private synchronized void init() {
         tModel = Daten.getInstance().getListeDownloads().getModelStarts(tModel);
         for (int i = 0; i < jTable1.getColumnCount(); ++i) {
-            if (i > DatenFilm.FILM_URL) {
+        	//TODO: Nicklas kontrolle
+//            if (i > DatenFilm.FILM_URL) {
+        	if (i > FilmColumns.URL.getId()) {
                 jTable1.getColumnModel().getColumn(i).setMinWidth(0);
                 jTable1.getColumnModel().getColumn(i).setMaxWidth(0);
                 jTable1.getColumnModel().getColumn(i).setPreferredWidth(0);

@@ -28,8 +28,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.TimerTask;
@@ -51,6 +53,8 @@ import javax.swing.SwingUtilities;
 import com.jidesoft.utils.SystemInfo;
 
 import de.mediathekview.mlib.daten.Film;
+import de.mediathekview.mlib.daten.FilmUrl;
+import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLaden;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLadenEvent;
 import de.mediathekview.mlib.tool.Datum;
@@ -64,9 +68,12 @@ import mediathek.config.Icons;
 import mediathek.config.MVConfig;
 import mediathek.controller.MVUsedUrl;
 import mediathek.controller.starter.Start;
+import mediathek.daten.Column;
+import mediathek.daten.ColumnManagerFactory;
 import mediathek.daten.DatenAbo;
 import mediathek.daten.DatenDownload;
 import mediathek.daten.DatenPset;
+import mediathek.daten.DownloadColumns;
 import mediathek.gui.bandwidth.MVBandwidthMonitorLWin;
 import mediathek.gui.dialog.DialogBeendenZeit;
 import mediathek.gui.dialog.DialogEditAbo;
@@ -342,9 +349,8 @@ public class GuiDownloads extends PanelVorlage {
         });
 
         tabelle.lineBreak = MVConfig.getBool(MVConfig.Configs.SYSTEM_TAB_DOWNLOAD_LINEBREAK);
-        tabelle.getTableHeader().addMouseListener(new BeobTableHeader(tabelle, DatenDownload.COLUMN_NAMES, DatenDownload.spaltenAnzeigen,
-                new int[]{DatenDownload.DOWNLOAD_BUTTON_START, DatenDownload.DOWNLOAD_BUTTON_DEL, DatenDownload.DOWNLOAD_REF},
-                new int[]{DatenDownload.DOWNLOAD_BUTTON_START, DatenDownload.DOWNLOAD_BUTTON_DEL},
+        tabelle.getTableHeader().addMouseListener(new BeobTableHeader(tabelle, ColumnManagerFactory.getInstance().getDownloadColumns(),
+        Arrays.asList(new Column[]{DownloadColumns.BUTTON_START, DownloadColumns.BUTTON_DEL, DownloadColumns.REF}),
                 true /*Icon*/, MVConfig.Configs.SYSTEM_TAB_DOWNLOAD_LINEBREAK));
 
         btnClear.setIcon(Icons.ICON_BUTTON_CLEAR);
@@ -792,7 +798,7 @@ public class GuiDownloads extends PanelVorlage {
                         urlAboList.add(new MVUsedUrl(zeit,
                                 datenDownload.arr[DatenDownload.DOWNLOAD_THEMA],
                                 datenDownload.arr[DatenDownload.DOWNLOAD_TITEL],
-                                datenDownload.arr[DatenDownload.DOWNLOAD_HISTORY_URL]));
+                                URI.create(datenDownload.arr[DatenDownload.DOWNLOAD_URL])));
                     }
                 } else {
                     // wenn nicht dauerhaft
@@ -854,7 +860,7 @@ public class GuiDownloads extends PanelVorlage {
                     listeUrlsDownloadsAbbrechen.add(download);
                     if (download.istAbo()) {
                         // wenn er schon feritg ist und ein Abos ist, Url auch aus dem Logfile löschen, der Film ist damit wieder auf "Anfang"
-                        daten.erledigteAbos.urlAusLogfileLoeschen(download.arr[DatenDownload.DOWNLOAD_HISTORY_URL]);
+                        daten.erledigteAbos.urlAusLogfileLoeschen(download.arr[DatenDownload.DOWNLOAD_URL]);
                     }
                 }
             }
@@ -960,7 +966,7 @@ public class GuiDownloads extends PanelVorlage {
                         listeDownloadsLoeschen.add(download);
                         if (download.istAbo()) {
                             // wenn er schon feritg ist und ein Abos ist, Url auch aus dem Logfile löschen, der Film ist damit wieder auf "Anfang"
-                            daten.erledigteAbos.urlAusLogfileLoeschen(download.arr[DatenDownload.DOWNLOAD_HISTORY_URL]);
+                            daten.erledigteAbos.urlAusLogfileLoeschen(download.arr[DatenDownload.DOWNLOAD_URL]);
                         }
                     }
                 }
@@ -1458,17 +1464,23 @@ public class GuiDownloads extends PanelVorlage {
                     DatenPset gruppe = Daten.listePset.getPsetAbspielen();
                     if (gruppe != null) {
                         DatenDownload datenDownload1 = (DatenDownload) tabelle.getModel().getValueAt(tabelle.convertRowIndexToModel(nr1), DatenDownload.DOWNLOAD_REF);
-                        if (datenDownload1 != null) {
-                            if (datenDownload1.film != null) {
-                                DatenFilm filmDownload = datenDownload1.film.getCopy();
-                                // und jetzt die tatsächlichen URLs des Downloads eintragen
-                                filmDownload.arr[DatenFilm.FILM_URL] = datenDownload1.arr[DatenDownload.DOWNLOAD_URL];
-                                filmDownload.arr[DatenFilm.FILM_URL_RTMP] = datenDownload1.arr[DatenDownload.DOWNLOAD_URL_RTMP];
-                                filmDownload.arr[DatenFilm.FILM_URL_KLEIN] = "";
-                                filmDownload.arr[DatenFilm.FILM_URL_RTMP_KLEIN] = "";
-                                // und starten
-                                daten.starterClass.urlMitProgrammStarten(gruppe, filmDownload, "" /*Auflösung*/);
-                            }
+                        if (datenDownload1 != null && datenDownload1.film != null) {
+                        	//TODO: Nicklas kontrolle
+                        	Film filmDownload = datenDownload1.film;
+                            // und jetzt die tatsächlichen URLs des Downloads eintragen
+                            filmDownload.addUrl(Qualities.NORMAL, new FilmUrl(URI.create(datenDownload1.arr[DatenDownload.DOWNLOAD_URL]), (long)0));
+//                            filmDownload.arr[DatenFilm.FILM_URL_RTMP] = datenDownload1.arr[DatenDownload.DOWNLOAD_URL_RTMP];
+//                            filmDownload.arr[DatenFilm.FILM_URL_KLEIN] = "";
+//                            filmDownload.arr[DatenFilm.FILM_URL_RTMP_KLEIN] = "";
+                        	
+//                                DatenFilm filmDownload = datenDownload1.film.getCopy();
+//                                // und jetzt die tatsächlichen URLs des Downloads eintragen
+//                                filmDownload.arr[DatenFilm.FILM_URL] = datenDownload1.arr[DatenDownload.DOWNLOAD_URL];
+//                                filmDownload.arr[DatenFilm.FILM_URL_RTMP] = datenDownload1.arr[DatenDownload.DOWNLOAD_URL_RTMP];
+//                                filmDownload.arr[DatenFilm.FILM_URL_KLEIN] = "";
+//                                filmDownload.arr[DatenFilm.FILM_URL_RTMP_KLEIN] = "";
+                            // und starten
+                            daten.starterClass.urlMitProgrammStarten(gruppe, filmDownload, Qualities.NORMAL /*Auflösung*/);
                         }
                     } else {
                         String menuPath;

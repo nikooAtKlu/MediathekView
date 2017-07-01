@@ -19,17 +19,18 @@
  */
 package mediathek.daten;
 
+import java.awt.Color;
+import java.util.Iterator;
+
+import javax.swing.JOptionPane;
+
 import com.jidesoft.utils.SystemInfo;
-import de.mediathekview.mlib.daten.Film;
+
 import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.config.Daten;
 import mediathek.tool.GuiFunktionenProgramme;
 import mediathek.tool.MVMessageDialog;
-
-import javax.swing.*;
-import java.awt.*;
-import java.util.Iterator;
 
 public class DatenPset extends MVData<DatenPset> {
 

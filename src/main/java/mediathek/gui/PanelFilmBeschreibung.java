@@ -35,6 +35,7 @@ import mediathek.config.Daten;
 import mediathek.config.Icons;
 import mediathek.config.MVConfig;
 import mediathek.daten.DatenDownload;
+import mediathek.daten.DownloadColumns;
 import mediathek.gui.actions.UrlHyperlinkAction;
 import mediathek.gui.dialog.DialogFilmBeschreibung;
 import mediathek.gui.tools.NotScrollingCaret;
@@ -72,9 +73,9 @@ public class PanelFilmBeschreibung extends JPanel implements ListSelectionListen
         jCheckBoxChange.setIcon(Icons.ICON_CHECKBOX_EDIT);
         jCheckBoxChange.addActionListener(e -> {
             if (currentFilm != null) {
-                final String akt = currentFilm.arr[DatenFilm.FILM_BESCHREIBUNG];
+                final String akt = currentFilm.getBeschreibung();
                 new DialogFilmBeschreibung(daten.getMediathekGui(), daten, currentFilm).setVisible(true);
-                if (!currentFilm.arr[DatenFilm.FILM_BESCHREIBUNG].equals(akt)) {
+                if (!currentFilm.getBeschreibung().equals(akt)) {
                     // dann hat sich die Beschreibung geändert
                     setText();
                     new WriteFilmlistJson().filmlisteSchreibenJson(Daten.getDateiFilmliste(), daten.getListeFilme());
@@ -105,7 +106,9 @@ public class PanelFilmBeschreibung extends JPanel implements ListSelectionListen
 
             switch (table.getTableType()) {
                 case FILME:
-                    film = (Film) model.getValueAt(modelIndex, DatenFilm.FILM_REF);
+                	//TODO: Nicklas kontrolle
+                    //film = (Film) model.getValueAt(modelIndex, DatenFilm.FILM_REF);
+                	film = (Film) model.getValueAt(modelIndex, DownloadColumns.REF.getId());
                     break;
 
                 case DOWNLOADS:
@@ -138,13 +141,13 @@ public class PanelFilmBeschreibung extends JPanel implements ListSelectionListen
                     "<html xmlns=\"http://www.w3.org/1999/xhtml\">"
                     + "<head><style type=\"text/css\">.sans { font-family: Verdana, Geneva, sans-serif; font-size: " + MVFont.fontSize + "pt; }</style></head>\n"
                     + "<body>"
-                    + "<span class=\"sans\"><b>" + (currentFilm.arr[DatenFilm.FILM_SENDER].isEmpty() ? "" : currentFilm.arr[DatenFilm.FILM_SENDER] + "  -  ")
-                    + currentFilm.arr[DatenFilm.FILM_TITEL] + "</b><br /></span>"
-                    + "<span class=\"sans\">" + currentFilm.arr[DatenFilm.FILM_BESCHREIBUNG].replace("\n", "<br />") + "</span>"
+                    + "<span class=\"sans\"><b>" + (currentFilm.getSender() == null ? "" : currentFilm.getSender().getName() + "  -  ")
+                    + currentFilm.getTitel() + "</b><br /></span>"
+                    + "<span class=\"sans\">" + currentFilm.getBeschreibung().replace("\n", "<br />") + "</span>"
                     + "</body>"
                     + "</html>");
 
-            jXHyperlinkWebsite.setText(currentFilm.arr[DatenFilm.FILM_WEBSEITE]);
+            jXHyperlinkWebsite.setText(currentFilm.getWebsite().toString());
         }
     }
 

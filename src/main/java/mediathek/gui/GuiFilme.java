@@ -83,11 +83,12 @@ import mediathek.config.Daten;
 import mediathek.config.Icons;
 import mediathek.config.MVConfig;
 import mediathek.controller.starter.Start;
+import mediathek.daten.ColumnManagerFactory;
 import mediathek.daten.DatenAbo;
 import mediathek.daten.DatenBlacklist;
 import mediathek.daten.DatenDownload;
 import mediathek.daten.DatenPset;
-import mediathek.daten.FilmCoulumns;
+import mediathek.daten.FilmColumns;
 import mediathek.daten.ListePset;
 import mediathek.filmlisten.GetModelTabFilme;
 import mediathek.gui.dialog.DialogAboNoSet;
@@ -250,7 +251,7 @@ public class GuiFilme extends PanelVorlage {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                SortKey sk = new SortKey(FilmCoulumns.SENDER.getId(), SortOrder.ASCENDING);
+                SortKey sk = new SortKey(FilmColumns.SENDER.getId(), SortOrder.ASCENDING);
                 LinkedList<SortKey> listSortKeys = new LinkedList<>();
                 listSortKeys.add(sk);
                 tabelle.getRowSorter().setSortKeys(listSortKeys);
@@ -367,7 +368,7 @@ public class GuiFilme extends PanelVorlage {
             }
         });
 
-        tabelle.setModel(new TModelFilm(new Object[][]{}, FilmCoulumns.values()));
+        tabelle.setModel(new TModelFilm(new Object[][]{}, FilmColumns.values()));
         BeobMausTabelle beobMausTabelle = new BeobMausTabelle();
         tabelle.addMouseListener(beobMausTabelle);
         tabelle.getSelectionModel().addListSelectionListener(event -> {
@@ -382,8 +383,8 @@ public class GuiFilme extends PanelVorlage {
         tabelle.setDefaultRenderer(Datum.class, cellRenderer);
         tabelle.setDefaultRenderer(Integer.class, cellRenderer);
         tabelle.lineBreak = MVConfig.getBool(MVConfig.Configs.SYSTEM_TAB_FILME_LINEBREAK);
-        tabelle.getTableHeader().addMouseListener(new BeobTableHeader(tabelle, Arrays.asList(FilmCoulumns.values()),
-                Arrays.asList(FilmCoulumns.FILM_ABSPIELEN, FilmCoulumns.FILM_AUFZEICHNEN),
+        tabelle.getTableHeader().addMouseListener(new BeobTableHeader(tabelle, ColumnManagerFactory.getInstance().getFilmColumns(),
+                Arrays.asList(FilmColumns.FILM_ABSPIELEN, FilmColumns.FILM_AUFZEICHNEN),
                 true /*Icon*/, MVConfig.Configs.SYSTEM_TAB_FILME_LINEBREAK));
 
         jCheckBoxProgamme.setIcon(Icons.ICON_CHECKBOX_CLOSE);
@@ -1422,7 +1423,7 @@ public class GuiFilme extends PanelVorlage {
 
         private void buttonTable(int row, int column) {
             if (row != -1) {
-                if (tabelle.convertColumnIndexToModel(column) == FilmCoulumns.FILM_ABSPIELEN.getId()) {
+                if (tabelle.convertColumnIndexToModel(column) == FilmColumns.FILM_ABSPIELEN.getId()) {
                     Optional<Film> filmSelection = getCurrentlySelectedFilm();
                     filmSelection.ifPresent(datenFilm -> {
                         boolean stop = false;
@@ -1439,7 +1440,7 @@ public class GuiFilme extends PanelVorlage {
                             playFilm();
                         }
                     });
-                } else if (tabelle.convertColumnIndexToModel(column) == FilmCoulumns.FILM_AUFZEICHNEN.getId()) {
+                } else if (tabelle.convertColumnIndexToModel(column) == FilmColumns.FILM_AUFZEICHNEN.getId()) {
                     saveFilm();
                 }
             }

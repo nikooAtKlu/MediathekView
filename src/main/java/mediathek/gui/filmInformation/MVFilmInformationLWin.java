@@ -49,6 +49,8 @@ import org.jdesktop.swingx.JXHyperlink;
 import de.mediathekview.mlib.daten.Film;
 import mediathek.config.Icons;
 import mediathek.config.MVConfig;
+import mediathek.daten.ColumnManagerFactory;
+import mediathek.daten.FilmColumns;
 import mediathek.gui.actions.UrlHyperlinkAction;
 import mediathek.gui.tools.NotScrollingCaret;
 import mediathek.tool.BeobMausUrl;
@@ -63,9 +65,10 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
     private JLabel jLabelFilmNeu;
     private JLabel jLabelFilmHD;
     private JLabel jLabelFilmUT;
-    private final JLabel[] labelArrNames = new JLabel[DatenFilm.MAX_ELEM];
-    private final JTextField[] txtArrCont = new JTextField[DatenFilm.MAX_ELEM];
-    private Film aktFilm = new Film();
+    private final JLabel[] labelArrNames = new JLabel[FilmColumns.values().length];
+    private final JTextField[] txtArrCont = new JTextField[FilmColumns.values().length];
+    //private Film aktFilm = new Film();
+    private Film aktFilm;
     private final JFrame parent;
     private static final ImageIcon ja_sw_16 = Icons.ICON_DIALOG_EIN_SW;
     static Point mouseDownCompCoords;
@@ -79,14 +82,15 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
         parent = owner;
         setTitle("Filminformation");
 
-        for (int i = 0; i < DatenFilm.MAX_ELEM; ++i) {
-            labelArrNames[i] = new JLabel(DatenFilm.COLUMN_NAMES[i] + ':');
-            labelArrNames[i].setHorizontalAlignment(SwingConstants.RIGHT);
-            labelArrNames[i].setDoubleBuffered(true);
-            txtArrCont[i] = new JTextField("");
-            txtArrCont[i].setEditable(false);
-            txtArrCont[i].setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-            txtArrCont[i].setDoubleBuffered(true);
+        //for (int i = 0; i < FilmColumns.values().length; ++i) {
+        for(FilmColumns colum : FilmColumns.values()) {
+            labelArrNames[colum.getId()] = new JLabel(colum.getName() + ':');
+            labelArrNames[colum.getId()].setHorizontalAlignment(SwingConstants.RIGHT);
+            labelArrNames[colum.getId()].setDoubleBuffered(true);
+            txtArrCont[colum.getId()] = new JTextField("");
+            txtArrCont[colum.getId()].setEditable(false);
+            txtArrCont[colum.getId()].setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+            txtArrCont[colum.getId()].setDoubleBuffered(true);
         }
 
         Dimension size = new Dimension(500, 600);//w,h
@@ -225,31 +229,31 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
         panel.add(labelArrNames[i]);
         c.gridx = 1;
         c.weightx = 1;
-        switch (i) {
-            case DatenFilm.FILM_WEBSEITE:
+        switch (ColumnManagerFactory.getInstance().getFilmColumnById(i)) {
+            case WEBSEITE:
                 gridbag.setConstraints(lblUrlThemaField, c);
                 panel.add(lblUrlThemaField);
                 break;
-            case DatenFilm.FILM_URL_SUBTITLE:
-                gridbag.setConstraints(lblUrlSubtitle, c);
-                panel.add(lblUrlSubtitle);
-                break;
-            case DatenFilm.FILM_BESCHREIBUNG:
+//            case SUBTITEL:
+//                gridbag.setConstraints(lblUrlSubtitle, c);
+//                panel.add(lblUrlSubtitle);
+//                break;
+            case BESCHREIBUNG:
                 JScrollPane sp = new JScrollPane();
                 sp.setMinimumSize(new Dimension(10, 100));
                 sp.setViewportView(textAreaBeschreibung);
                 gridbag.setConstraints(sp, c);
                 panel.add(sp);
                 break;
-            case DatenFilm.FILM_NEU:
+            case NEU:
                 gridbag.setConstraints(jLabelFilmNeu, c);
                 panel.add(jLabelFilmNeu);
                 break;
-            case DatenFilm.FILM_HD:
+            case HD:
                 gridbag.setConstraints(jLabelFilmHD, c);
                 panel.add(jLabelFilmHD);
                 break;
-            case DatenFilm.FILM_UT:
+            case UT:
                 gridbag.setConstraints(jLabelFilmUT, c);
                 panel.add(jLabelFilmUT);
                 break;
@@ -267,7 +271,7 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
     }
 
     @Override
-    public void updateCurrentFilm(DatenFilm film) {
+    public void updateCurrentFilm(Film film) {
         aktFilm = film;
         if (this.isVisible()) {
             setAktFilm();
@@ -289,16 +293,16 @@ public class MVFilmInformationLWin extends JDialog implements IFilmInformation {
             for (int i = 0; i < txtArrCont.length; ++i) {
                 txtArrCont[i].setText(aktFilm.arr[i]);
             }
-            if (aktFilm.arr[DatenFilm.FILM_BESCHREIBUNG].isEmpty()) {
+            if (aktFilm.getBeschreibung().isEmpty()) {
                 // sonst müsste die Größe gesetzt werden
                 textAreaBeschreibung.setText(" ");
             } else {
-                textAreaBeschreibung.setText(aktFilm.arr[DatenFilm.FILM_BESCHREIBUNG]);
+                textAreaBeschreibung.setText(aktFilm.getBeschreibung());
             }
-            lblUrlThemaField.setText(aktFilm.arr[DatenFilm.FILM_WEBSEITE]);
+            lblUrlThemaField.setText(aktFilm.getWebsite().toString());
             lblUrlSubtitle.setText(aktFilm.getUrlSubtitle());
-            jLabelFilmNeu.setVisible(aktFilm.isNew());
-            jLabelFilmHD.setVisible(aktFilm.isHD());
+            jLabelFilmNeu.setVisible(aktFilm.isNeu());
+            jLabelFilmHD.setVisible(aktFilm.hasHD());
             jLabelFilmUT.setVisible(aktFilm.hasUT());
         }
         this.repaint();

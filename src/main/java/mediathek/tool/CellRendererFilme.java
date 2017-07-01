@@ -31,7 +31,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import com.jidesoft.utils.SystemInfo;
 
 import de.mediathekview.mlib.daten.Film;
-import de.mediathekview.mlib.daten.ListeFilme;
+import de.mediathekview.mlib.daten.Qualities;
 import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.config.Daten;
@@ -40,7 +40,10 @@ import mediathek.config.MVColor;
 import mediathek.config.MVConfig;
 import mediathek.controller.MVUsedUrls;
 import mediathek.controller.starter.Start;
+import mediathek.daten.ColumnManagerFactory;
 import mediathek.daten.DatenDownload;
+import mediathek.daten.DownloadColumns;
+import mediathek.daten.FilmColumns;
 
 @SuppressWarnings("serial")
 public class CellRendererFilme extends DefaultTableCellRenderer {
@@ -94,16 +97,17 @@ public class CellRendererFilme extends DefaultTableCellRenderer {
 
             final int rowModelIndex = table.convertRowIndexToModel(row);
             final int columnModelIndex = table.convertColumnIndexToModel(column);
-            Film datenFilm = (Film) table.getModel().getValueAt(rowModelIndex, DatenFilm.FILM_REF);
-            DatenDownload datenDownload = Daten.getInstance().getListeDownloadsButton().getDownloadUrlFilm(datenFilm.arr[DatenFilm.FILM_URL]);
+            Film datenFilm = (Film) table.getModel().getValueAt(rowModelIndex, DownloadColumns.REF.getId());
+            //DatenDownload datenDownload = Daten.getInstance().getListeDownloadsButton().getDownloadUrlFilm(datenFilm.arr[DatenFilm.FILM_URL]);
+            DatenDownload datenDownload = Daten.getInstance().getListeDownloadsButton().getDownloadUrlFilm(datenFilm.getUrl(Qualities.NORMAL));
 
             if (((MVTable) table).lineBreak) {
                 JTextArea textArea;
                 switch (columnModelIndex) {
-                    case DatenFilm.FILM_BESCHREIBUNG:
-                    case DatenFilm.FILM_THEMA:
-                    case DatenFilm.FILM_TITEL:
-                    case DatenFilm.FILM_URL:
+                	case FilmColumns.BESCHREIBUNG.getId():
+                    case FilmColumns.THEMA.getId():
+                    case FilmColumns.TITEL.getId():
+                    case FilmColumns.URL.getId():
                         textArea = new JTextArea();
                         textArea.setLineWrap(true);
                         textArea.setWrapStyleWord(true);
@@ -131,47 +135,47 @@ public class CellRendererFilme extends DefaultTableCellRenderer {
                     setFont(new java.awt.Font("Dialog", Font.PLAIN, MVFont.fontSize));
                 }
             }
-            switch (columnModelIndex) {
-                case DatenFilm.FILM_NR:
-                case DatenFilm.FILM_DATUM:
-                case DatenFilm.FILM_ZEIT:
-                case DatenFilm.FILM_DAUER:
+            switch(ColumnManagerFactory.getInstance().getFilmColumnById(columnModelIndex)) {
+                case NR:
+                case DATUM:
+                case ZEIT:
+                case DAUER:
                     setHorizontalAlignment(SwingConstants.CENTER);
                     break;
-                case DatenFilm.FILM_GROESSE:
+                case GROESSE:
                     setHorizontalAlignment(SwingConstants.RIGHT);
                     break;
-                case DatenFilm.FILM_ABSPIELEN:
+                case FILM_ABSPIELEN:
                     handleButtonStartColumn(datenDownload, isSelected);
                     break;
 
-                case DatenFilm.FILM_AUFZEICHNEN:
+                case FILM_AUFZEICHNEN:
                     handleButtonDownloadColumn(isSelected);
                     break;
-                case DatenFilm.FILM_SENDER:
+                case SENDER:
                     if (((MVTable) table).iconAnzeigen) {
                         handleSenderColumn((String) value, ((MVTable) table).iconKlein);
                     }
                     break;
                 case DatenFilm.FILM_NEU:
                     setHorizontalAlignment(SwingConstants.CENTER);
-                    if (datenFilm.isNew()) {
+                    if (datenFilm.isNeu()) {
                         setIcon(ja_16);
                     } else {
                         setIcon(nein_12);
                     }
                     setText("");
                     break;
-                case DatenFilm.FILM_HD:
+                case HD:
                     setHorizontalAlignment(SwingConstants.CENTER);
-                    if (datenFilm.isHD()) {
+                    if (datenFilm.hasHD()) {
                         setIcon(ja_16);
                     } else {
                         setIcon(nein_12);
                     }
                     setText("");//im Modle brauchen wir den Text zum Sortieren
                     break;
-                case DatenFilm.FILM_UT:
+                case UT:
                     setHorizontalAlignment(SwingConstants.CENTER);
                     if (datenFilm.hasUT()) {
                         setIcon(ja_16);
@@ -188,70 +192,67 @@ public class CellRendererFilme extends DefaultTableCellRenderer {
         return this;
     }
 
-    private void setColor(Component c, DatenFilm datenFilm, DatenDownload datenDownload, boolean isSelected) {
-        boolean live = datenFilm.arr[DatenFilm.FILM_THEMA].equals(ListeFilme.THEMA_LIVE);
+    private void setColor(Component c, Film datenFilm, DatenDownload datenDownload, boolean isSelected) {
+        //boolean live = datenFilm.arr[DatenFilm.FILM_THEMA].equals(ListeFilme.THEMA_LIVE);
+    	boolean live = datenFilm.getThema().equals(de.mediathekview.mlib.Const.THEMA_LIVESTREAM);
         boolean start = false;
 
-        if (datenDownload != null) {
+        if (datenDownload != null && datenDownload.start != null) {
             // gestarteter Film
-            if (datenDownload.start != null) {
-                start = true;
+            start = true;
 
-                switch (datenDownload.start.status) {
-                    case Start.STATUS_INIT:
-                        if (isSelected) {
-                            c.setBackground(MVColor.DOWNLOAD_WAIT_SEL.color);
-                        } else {
-                            c.setBackground(MVColor.DOWNLOAD_WAIT.color);
-                        }
-                        break;
-                    case Start.STATUS_RUN:
-                        if (isSelected) {
-                            c.setBackground(MVColor.DOWNLOAD_RUN_SEL.color);
-                        } else {
-                            c.setBackground(MVColor.DOWNLOAD_RUN.color);
-                        }
-                        break;
-                    case Start.STATUS_FERTIG:
-                        if (isSelected) {
-                            c.setBackground(MVColor.DOWNLOAD_FERTIG_SEL.color);
-                        } else {
-                            c.setBackground(MVColor.DOWNLOAD_FERTIG.color);
-                        }
-                        break;
-                    case Start.STATUS_ERR:
-                        if (isSelected) {
-                            c.setBackground(MVColor.DOWNLOAD_FEHLER_SEL.color);
-                        } else {
-                            c.setBackground(MVColor.DOWNLOAD_FEHLER.color);
-                        }
-                        break;
-                }
-
+            switch (datenDownload.start.status) {
+                case Start.STATUS_INIT:
+                    if (isSelected) {
+                        c.setBackground(MVColor.DOWNLOAD_WAIT_SEL.color);
+                    } else {
+                        c.setBackground(MVColor.DOWNLOAD_WAIT.color);
+                    }
+                    break;
+                case Start.STATUS_RUN:
+                    if (isSelected) {
+                        c.setBackground(MVColor.DOWNLOAD_RUN_SEL.color);
+                    } else {
+                        c.setBackground(MVColor.DOWNLOAD_RUN.color);
+                    }
+                    break;
+                case Start.STATUS_FERTIG:
+                    if (isSelected) {
+                        c.setBackground(MVColor.DOWNLOAD_FERTIG_SEL.color);
+                    } else {
+                        c.setBackground(MVColor.DOWNLOAD_FERTIG.color);
+                    }
+                    break;
+                case Start.STATUS_ERR:
+                    if (isSelected) {
+                        c.setBackground(MVColor.DOWNLOAD_FEHLER_SEL.color);
+                    } else {
+                        c.setBackground(MVColor.DOWNLOAD_FEHLER.color);
+                    }
+                    break;
             }
         }
         if (!start) {
             if (live) {
                 // bei livestreams keine History anzeigen
                 c.setForeground(MVColor.FILM_LIVESTREAM.color);
-            } else if (history.urlPruefen(datenFilm.getUrlHistory())) {
+            } else if (history.urlPruefen(datenFilm.getUrl(Qualities.NORMAL))) {
                 if (!isSelected) {
                     c.setBackground(MVColor.FILM_HISTORY.color);
                 }
-            } else if (datenFilm.isNew()) {
+            } else if (datenFilm.isNeu()) {
                 c.setForeground(MVColor.FILM_NEU.color);
             }
         }
-        if (!start && geoMelden) {
-            if (!datenFilm.arr[DatenFilm.FILM_GEO].isEmpty()) {
-                if (!datenFilm.arr[DatenFilm.FILM_GEO].contains(MVConfig.get(MVConfig.Configs.SYSTEM_GEO_STANDORT))) {
-                    //setForeground(GuiKonstanten.FARBE_FILM_GEOBLOCK_FORGROUND);
-                    if (isSelected) {
-                        c.setBackground(MVColor.FILM_GEOBLOCK_BACKGROUND_SEL.color);
-                    } else {
-                        c.setBackground(MVColor.FILM_GEOBLOCK_BACKGROUND.color);
-                    }
-                }
+        if (!start && 
+        	geoMelden && 
+        	!datenFilm.getGeoLocations().isEmpty() && 
+        	!datenFilm.getGeoLocations().contains(MVConfig.get(MVConfig.Configs.SYSTEM_GEO_STANDORT))) {
+            //setForeground(GuiKonstanten.FARBE_FILM_GEOBLOCK_FORGROUND);
+            if (isSelected) {
+                c.setBackground(MVColor.FILM_GEOBLOCK_BACKGROUND_SEL.color);
+            } else {
+                c.setBackground(MVColor.FILM_GEOBLOCK_BACKGROUND.color);
             }
         }
 

@@ -51,11 +51,15 @@ import de.mediathekview.mlib.tool.Listener;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.config.Daten;
 import mediathek.config.MVConfig;
+import mediathek.daten.AboColumns;
+import mediathek.daten.ColumnManagerFactory;
 import mediathek.daten.DatenAbo;
 import mediathek.daten.DatenDownload;
 import mediathek.daten.DatenMediaDB;
 import mediathek.daten.DatenProg;
 import mediathek.daten.DatenPset;
+import mediathek.daten.DownloadColumns;
+import mediathek.daten.FilmColumns;
 
 @SuppressWarnings("serial")
 public final class MVTable extends JTable {
@@ -104,39 +108,40 @@ public final class MVTable extends JTable {
         String[] spaltenTitel;
         switch (tabelle) {
             case FILME:
-                spaltenTitel = DatenFilm.COLUMN_NAMES;
-                maxSpalten = DatenFilm.MAX_ELEM;
-                spaltenAnzeigen = getSpaltenEinAus(DatenFilm.spaltenAnzeigen, DatenFilm.MAX_ELEM);
-                indexSpalte = DatenFilm.FILM_NR;
+                //spaltenTitel = DatenFilm.COLUMN_NAMES;
+                maxSpalten = FilmColumns.values().length;
+                spaltenAnzeigen = getSpaltenEinAus(DatenFilm.spaltenAnzeigen, FilmColumns.values().length);
+                indexSpalte = FilmColumns.NR.getId();
                 nrDatenSystem = MVConfig.Configs.SYSTEM_EIGENSCHAFTEN_TABELLE_FILME;
                 iconAnzeigenStr = MVConfig.Configs.SYSTEM_TAB_FILME_ICON_ANZEIGEN;
                 iconKleinStr = MVConfig.Configs.SYSTEM_TAB_FILME_ICON_KLEIN;
-                this.setModel(new TModelFilm(new Object[][]{}, spaltenTitel));
+                //this.setModel(new TModelFilm(new Object[][]{}, spaltenTitel));
+                this.setModel(new TModelFilm(new Object[][]{}, ColumnManagerFactory.getInstance().getFilmColumnAllNames()));
                 this.getTableHeader().addMouseListener(new WidthAdjuster(this));
                 break;
             case DOWNLOADS:
-                spaltenTitel = DatenDownload.COLUMN_NAMES;
-                maxSpalten = DatenDownload.MAX_ELEM;
-                spaltenAnzeigen = getSpaltenEinAus(DatenDownload.spaltenAnzeigen, DatenDownload.MAX_ELEM);
-                indexSpalte = DatenDownload.DOWNLOAD_NR;
+                //spaltenTitel = DatenDownload.COLUMN_NAMES;
+                maxSpalten = DownloadColumns.values().length;
+                spaltenAnzeigen = getSpaltenEinAus(DatenDownload.spaltenAnzeigen, DownloadColumns.values().length);
+                indexSpalte = DownloadColumns.NR.getId();
                 nrDatenSystem = MVConfig.Configs.SYSTEM_EIGENSCHAFTEN_TABELLE_DOWNLOADS;
                 iconAnzeigenStr = MVConfig.Configs.SYSTEM_TAB_DOWNLOAD_ICON_ANZEIGEN;
                 iconKleinStr = MVConfig.Configs.SYSTEM_TAB_DOWNLOAD_ICON_KLEIN;
                 setDragEnabled(true);
                 setDropMode(DropMode.INSERT_ROWS);
                 setTransferHandler(new TableRowTransferHandlerDownload(this));
-                setModel(new TModelDownload(new Object[][]{}, spaltenTitel));
+                setModel(new TModelDownload(new Object[][]{}, ColumnManagerFactory.getInstance().getDownloadColumnAllNames()));
                 this.getTableHeader().addMouseListener(new WidthAdjuster(this));
                 break;
             case ABOS:
-                spaltenTitel = DatenAbo.COLUMN_NAMES;
-                maxSpalten = DatenAbo.MAX_ELEM;
-                spaltenAnzeigen = getSpaltenEinAus(DatenAbo.spaltenAnzeigen, DatenAbo.MAX_ELEM);
-                indexSpalte = DatenAbo.ABO_NR;
+                //spaltenTitel = DatenAbo.COLUMN_NAMES;
+                maxSpalten = AboColumns.values().length;
+                spaltenAnzeigen = getSpaltenEinAus(DatenAbo.spaltenAnzeigen, AboColumns.values().length);
+                indexSpalte = AboColumns.NR.getId();
                 nrDatenSystem = MVConfig.Configs.SYSTEM_EIGENSCHAFTEN_TABELLE_ABOS;
                 iconAnzeigenStr = MVConfig.Configs.SYSTEM_TAB_ABO_ICON_ANZEIGEN;
                 iconKleinStr = MVConfig.Configs.SYSTEM_TAB_ABO_ICON_KLEIN;
-                this.setModel(new TModelAbo(new Object[][]{}, spaltenTitel));
+                this.setModel(new TModelAbo(new Object[][]{}, ColumnManagerFactory.getInstance().getAboColumnAllNames()));
                 this.getTableHeader().addMouseListener(new WidthAdjuster(this));
                 break;
             case PSET:
@@ -207,7 +212,7 @@ public final class MVTable extends JTable {
         int size;
         switch (tabelle) {
             case FILME:
-                if (spaltenAnzeigen[DatenFilm.FILM_BESCHREIBUNG]) {
+                if (spaltenAnzeigen[FilmColumns.BESCHREIBUNG.getId()]) {
                     sizeArea = MVFont.fontSize * 5;
                 } else if (lineBreak) {
                     sizeArea = MVFont.fontSize * 4;
@@ -577,10 +582,8 @@ public final class MVTable extends JTable {
             for (int i = 0; i < reihe.length && i < this.getColumnCount(); ++i) {
                 this.getColumnModel().moveColumn(this.convertColumnIndexToView(reihe[i]), i);
             }
-            if (listeSortKeys != null) {
-                if (!listeSortKeys.isEmpty()) {
-                    this.getRowSorter().setSortKeys(listeSortKeys);
-                }
+            if (listeSortKeys != null && !listeSortKeys.isEmpty()) {
+            	this.getRowSorter().setSortKeys(listeSortKeys);
             }
             setSelected();
             this.validate();
@@ -592,31 +595,31 @@ public final class MVTable extends JTable {
     private void resetFilmeTab(int i) {
         reihe[i] = i;
         breite[i] = 200;
-        switch (i) {
-            case DatenFilm.FILM_NR:
+        switch (ColumnManagerFactory.getInstance().getFilmColumnById(i)) {
+            case NR:
                 breite[i] = 75;
                 break;
-            case DatenFilm.FILM_TITEL:
+            case TITEL:
                 breite[i] = 300;
                 break;
-            case DatenFilm.FILM_BESCHREIBUNG:
+            case BESCHREIBUNG:
                 breite[i] = 400;
                 break;
-            case DatenFilm.FILM_DATUM:
-            case DatenFilm.FILM_ZEIT:
-            case DatenFilm.FILM_SENDER:
-            case DatenFilm.FILM_GROESSE:
-            case DatenFilm.FILM_DAUER:
-            case DatenFilm.FILM_GEO:
+            case DATUM:
+            case ZEIT:
+            case SENDER:
+            case GROESSE:
+            case DAUER:
+            case GEO:
                 breite[i] = 100;
                 break;
-            case DatenFilm.FILM_URL:
+            case URL:
                 breite[i] = 500;
                 break;
-            case DatenFilm.FILM_ABSPIELEN:
-            case DatenFilm.FILM_AUFZEICHNEN:
-            case DatenFilm.FILM_HD:
-            case DatenFilm.FILM_UT:
+            case FILM_ABSPIELEN:
+            case FILM_AUFZEICHNEN:
+            case HD:
+            case UT:
                 breite[i] = 50;
                 break;
             default:
@@ -710,8 +713,8 @@ public final class MVTable extends JTable {
     }
 
     private void spaltenAusschaltenFilme(int i) {
-        if (i == DatenFilm.FILM_BESCHREIBUNG
-                || i == DatenFilm.FILM_WEBSEITE
+        if (i == FilmColumns.BESCHREIBUNG.getId()
+                || i == FilmColumns.WEBSEITE.getId()
                 || i == DatenFilm.FILM_NEU
                 || i == DatenFilm.FILM_URL_RTMP
                 || i == DatenFilm.FILM_URL_AUTH

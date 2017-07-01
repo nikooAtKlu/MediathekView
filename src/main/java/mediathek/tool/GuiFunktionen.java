@@ -19,21 +19,33 @@
  */
 package mediathek.tool;
 
+import static de.mediathekview.mlib.tool.Functions.getOs;
+
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Toolkit;
+import java.awt.Window;
+import java.awt.datatransfer.StringSelection;
+import java.io.File;
+import java.lang.reflect.Field;
+
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
 import com.jidesoft.utils.SystemInfo;
+
+import de.mediathekview.mlib.daten.Sender;
 import de.mediathekview.mlib.tool.Functions.OperatingSystemType;
 import de.mediathekview.mlib.tool.Log;
 import mediathek.MediathekGui;
 import mediathek.config.Konstanten;
 import mediathek.config.MVConfig;
 import mediathek.config.MVConfig.Configs;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.datatransfer.StringSelection;
-import java.io.File;
-import java.lang.reflect.Field;
-
-import static de.mediathekview.mlib.tool.Functions.getOs;
 
 public class GuiFunktionen extends MVFunctionSys {
 
@@ -334,10 +346,21 @@ public class GuiFunktionen extends MVFunctionSys {
 
     public static String[] addLeerListe(String[] str) {
         //ein Leerzeichen der Liste voranstellen
-        int len = str.length + 1;
-        String[] liste = new String[len];
+        String[] liste = new String[str.length + 1];
         liste[0] = "";
-        System.arraycopy(str, 0, liste, 1, len - 1);
+        System.arraycopy(str, 0, liste, 1, str.length);
+        return liste;
+    }
+    
+    public static String[] addLeerListe(Sender[] str) {
+        //ein Leerzeichen der Liste voranstellen
+        String[] liste = new String[str.length + 1];
+        liste[0] = "";
+        int i = 1;
+        for(Sender s : str) {
+        	liste[i] = s.getName();
+        	i++;
+        }
         return liste;
     }
 

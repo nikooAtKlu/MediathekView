@@ -19,6 +19,23 @@
  */
 package mediathek.gui.dialogEinstellungen;
 
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import de.mediathekview.mlib.daten.Sender;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLaden;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLadenEvent;
 import de.mediathekview.mlib.tool.Listener;
@@ -33,17 +50,6 @@ import mediathek.tool.Filter;
 import mediathek.tool.GuiFunktionen;
 import mediathek.tool.TModel;
 import mediathek.tool.TextCopyPaste;
-
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 @SuppressWarnings("serial")
 public class PanelBlacklist extends PanelVorlage {
@@ -244,7 +250,7 @@ public class PanelBlacklist extends PanelVorlage {
 
     private void initCombo() {
         // der erste Sender ist ""
-        final String[] sender = GuiFunktionen.addLeerListe(daten.getFilmeLaden().getSenderNamen());
+        final String[] sender = GuiFunktionen.addLeerListe(Sender.values());
         jComboBoxSender.setModel(new javax.swing.DefaultComboBoxModel<>(sender));
     }
 

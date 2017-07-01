@@ -113,13 +113,6 @@ public final class DatenDownload extends MVData<DatenDownload> {
     //
     public static final String TAG = "Downlad";
     public static final int MAX_ELEM = 40;
-    public static final String[] COLUMN_NAMES = {"Nr", "Filmnr", "Abo", "Sender", "Thema", "Titel", "", "",
-        "Fortschritt", "Restzeit", "Geschwindigkeit", "Größe [MB]",
-        "Datum", "Zeit", "Dauer", "HD", "UT",
-        "Pause", "Geo", "Url Film", "Url History", "Url", "Url RTMP", "Url Untertitel",
-        "Programmset", "Programm", "Programmaufruf", "Programmaufruf Array", "Restart",
-        "Dateiname", "Pfad", "Pfad-Dateiname", "Art", "Quelle",
-        "Zurückgestellt", "Infodatei", "Spotlight", "Untertitel", "Remote Download", "Ref"};
     public static final String[] XML_NAMES = {"Nr", "Filmnr", "Abo", "Sender", "Thema", "Titel", "Button-Start", "Button-Del",
         "Fortschritt", "Restzeit", "Geschwindigkeit", "Groesse"/*DOWNLOAD_GROESSE*/,
         "Datum", "Zeit", "Dauer", "HD", "UT",
@@ -127,7 +120,6 @@ public final class DatenDownload extends MVData<DatenDownload> {
         "Programmset", "Programm", "Programmaufruf_", "Programmaufruf", "Restart",
         "Dateiname", "Pfad", "Pfad-Dateiname", "Art", "Quelle",
         "Zurueckgestellt", "Infodatei", "Spotlight", "Untertitel", "Remote-Download", "Ref"};
-    public static boolean[] spaltenAnzeigen = new boolean[MAX_ELEM];
 
     public Datum datumFilm = new Datum(0);
     public Film film = null;
@@ -150,15 +142,6 @@ public final class DatenDownload extends MVData<DatenDownload> {
         this.abo = abo;
         aufrufBauen(pSet, film, abo, name, pfad);
         init();
-    }
-
-
-    public static boolean anzeigen(int i) {
-        if (spaltenAnzeigen == null) {
-            return true;
-        } else {
-            return spaltenAnzeigen[i];
-        }
     }
 
     public final void init() {
@@ -261,16 +244,10 @@ public final class DatenDownload extends MVData<DatenDownload> {
         LinkedList<MVUsedUrl> urlList = new LinkedList<>();
         for (DatenDownload d : downloads) {
             d.start = new Start();
-            try
-            {
-                urlList.add(new MVUsedUrl(zeit,
-                        d.arr[DatenDownload.DOWNLOAD_THEMA],
-                        d.arr[DatenDownload.DOWNLOAD_TITEL],
-                        new URI(d.arr[DatenDownload.DOWNLOAD_URL])));
-            }catch (URISyntaxException uriSyntaxException)
-            {
-                Log.errorLog(420002, uriSyntaxException);
-            }
+            urlList.add(new MVUsedUrl(zeit,
+                    d.arr[DatenDownload.DOWNLOAD_THEMA],
+                    d.arr[DatenDownload.DOWNLOAD_TITEL],
+                    URI.create(d.arr[DatenDownload.DOWNLOAD_URL])));
         }
         if (!urlList.isEmpty()) {
             ddaten.history.zeilenSchreiben(urlList);
