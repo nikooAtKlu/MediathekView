@@ -9,4 +9,4 @@ def includeIfExists(String path) {
     project(projectName).projectDir = dir
   }
 }
-includeIfExists('../MSearch')
+includeIfExists('../MLib')

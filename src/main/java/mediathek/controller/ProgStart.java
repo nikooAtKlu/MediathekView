@@ -21,6 +21,7 @@ package mediathek.controller;
 
 import java.time.LocalDateTime;
 
+import de.mediathekview.mlib.daten.Film;
 import de.mediathekview.mlib.filmesuchen.ListenerFilmeLadenEvent;
 import de.mediathekview.mlib.filmlisten.FilmlisteLesen;
 import de.mediathekview.mlib.tool.Duration;
@@ -49,17 +50,11 @@ public class ProgStart {
 
             Daten daten = Daten.getInstance();
 
-            //TODO: Nicklas kontrolle
-            //new FilmlisteLesen().readFilmListe(Daten.getDateiFilmliste(), daten.getListeFilme(), Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ANZ_TAGE_FILMLISTE)));
             new FilmlisteLesen().readFilmListe(Daten.getDateiFilmliste(), Integer.parseInt(MVConfig.get(MVConfig.Configs.SYSTEM_ANZ_TAGE_FILMLISTE)));
-            //TODO: Nicklas kontrolle
-            //SysMsg.sysMsg("Liste Filme gelesen am: " + FormatterUtil.FORMATTER_ddMMyyyyHHmm.format(new Date()));
             SysMsg.sysMsg("Liste Filme gelesen am: " + LocalDateTime.now().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm));
             SysMsg.sysMsg("  erstellt am: " + daten.getListeFilme().genDate());
             SysMsg.sysMsg("  Anzahl Filme: " + daten.getListeFilme().size());
-            //TODO: Nicklas Zähler für neue Filme implementieren
-            //SysMsg.sysMsg("  Anzahl Neue: " + daten.getListeFilme().countNewFilms()); // Alter aufruf
-            //SysMsg.sysMsg("  Anzahl Neue: " + daten.getListeFilme().);
+            SysMsg.sysMsg("  Anzahl Neue: " + daten.getListeFilme().stream().filter(Film::isNeu).count()); // Alter aufruf
 
             if (GuiFunktionen.getImportArtFilme() == Konstanten.UPDATE_FILME_AUTO && daten.getListeFilme().isTooOld()) {
                 SysMsg.sysMsg("Filmliste zu alt, neue Filmliste laden");
