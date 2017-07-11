@@ -84,7 +84,7 @@ public class Filter {
                             || pruefen(themaTitelSuchen, film.getTitel())) {
 
                         if (irgendwoSuchen.length == 0
-                                || pruefen(irgendwoSuchen, film.getTime().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm))
+                                || pruefen(irgendwoSuchen, film.getTime() == null ? "" : film.getTime().format(FormatterUtil.FORMATTER_ddMMyyyyHHmm))
                                 || pruefen(irgendwoSuchen, film.getThema())
                                 || pruefen(irgendwoSuchen, film.getTitel())
                                 || pruefen(irgendwoSuchen, film.getBeschreibung())) {

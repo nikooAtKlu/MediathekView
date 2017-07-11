@@ -42,11 +42,11 @@ public class GetModelTabFilme {
         // Model für die Tabelle Filme zusammenbauen
         if (listeFilme.isEmpty()) {
             // wenn die Liste leer ist, dann Tschüss
-            table.setModel(new TModelFilm(new Object[][]{}, FilmColumns.values()));
+            table.setModel(new TModelFilm(new Object[][]{}, ColumnManagerFactory.getInstance().getFilmColumnAllNames()));
             return;
         }
         // dann ein neues Model anlegen
-        TModel tModel = new TModelFilm(new Object[][]{}, FilmColumns.values());
+        TModel tModel = new TModelFilm(new Object[][]{}, ColumnManagerFactory.getInstance().getFilmColumnAllNames());
         if (filterSender.isEmpty() && filterThema.isEmpty() && filterTitel.isEmpty() && filterThemaTitel.isEmpty() && filterIrgendwo.isEmpty() && laenge == 0
                 && !keineAbos && !kGesehen && !nurHd && !nurUt && !live && !nurNeue) {
             // dann ganze Liste laden
