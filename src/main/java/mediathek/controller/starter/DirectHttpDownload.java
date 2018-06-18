@@ -42,6 +42,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
+import javax.security.cert.X509Certificate;
+
 import static mediathek.controller.starter.StarterClass.*;
 
 public class DirectHttpDownload extends Thread {
@@ -50,6 +55,7 @@ public class DirectHttpDownload extends Thread {
     private final DatenDownload datenDownload;
     private final Start start;
     private HttpURLConnection conn = null;
+    private static HostnameVerifier someHostsValid = null;
     private HttpDownloadState state = HttpDownloadState.DOWNLOAD;
     private long downloaded = 0;
     private File file = null;
@@ -65,6 +71,30 @@ public class DirectHttpDownload extends Thread {
     enum HttpDownloadState {
 
         CANCEL, ERROR, DOWNLOAD
+    }
+
+    static {
+        someHostsValid = new HostnameVerifier() {
+            public boolean verify(String hostname, SSLSession session) {
+                HostnameVerifier defHV = HttpsURLConnection.getDefaultHostnameVerifier();
+                if(defHV.verify(hostname,session)) {
+                    return true;
+                }
+                try {
+                    X509Certificate[] certs = session.getPeerCertificateChain();
+                    String s = null;
+                    for(int i=0; s==null && i<certs.length; i++) {
+                        s = certs[i].getSubjectDN().toString();
+                    }
+                    if(hostname.equals("apasfpd.apa.at") && s!=null && s.equals("CN=*.sf.apa.at")) {
+                        System.out.println("WARNUNG: hostname "+hostname+" passt nicht zum Zertifikat "+s+" -> ignoriert...");
+                        return true;
+                    }
+                }
+                catch(Exception e) {}
+                return false;
+            }
+        };
     }
 
     public DirectHttpDownload(Daten daten, DatenDownload d, java.util.Timer bandwidthCalculationTimer) {
@@ -90,6 +120,10 @@ public class DirectHttpDownload extends Thread {
         HttpURLConnection connection = null;
         try {
             connection = (HttpURLConnection) url.openConnection();
+            if(MVConfig.getBool(MVConfig.Configs.SYSTEM_PARAMETER_IGNORE_SPECIFIC_SSL_HOSTS) && connection instanceof HttpsURLConnection) {
+                HttpsURLConnection httpsUrlConnection = (HttpsURLConnection) connection;
+                httpsUrlConnection.setHostnameVerifier(someHostsValid);
+            }
             connection.setRequestProperty("User-Agent", Daten.getUserAgent());
             connection.setReadTimeout(TIMEOUT_LENGTH);
             connection.setConnectTimeout(TIMEOUT_LENGTH);
@@ -121,6 +155,10 @@ public class DirectHttpDownload extends Thread {
         conn.setRequestProperty("User-Agent", Daten.getUserAgent());
         conn.setDoInput(true);
         conn.setDoOutput(true);
+        if(MVConfig.getBool(MVConfig.Configs.SYSTEM_PARAMETER_IGNORE_SPECIFIC_SSL_HOSTS) && conn instanceof HttpsURLConnection) {
+            HttpsURLConnection httpsUrlConnection = (HttpsURLConnection) conn;
+            httpsUrlConnection.setHostnameVerifier(someHostsValid);
+        }
     }
 
     /**
